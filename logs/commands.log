@@ -1,0 +1,8 @@
+[2026-11-15 12:35:31] /opt/homebrew/bin/python3.11 -m venv .venv
+[2026-11-15 12:35:32] .venv/bin/python --version
+[2026-11-15 12:35:37] .venv/bin/pip install -q --upgrade pip
+[2026-11-15 12:35:44] .venv/bin/pip install -q torch torchvision ultralytics pycocotools transformers>=4.40 pyyaml pandas matplotlib tqdm pillow
+[2026-11-15 12:37:41] .venv/bin/python scripts/record_env.py
+[2026-11-15 12:37:51] scripts/download_coco.sh
+[2026-11-15 12:39:37] .venv/bin/python scripts/check_kitti.py
+[2026-11-15 12:39:59] .venv/bin/python scripts/check_coco.py

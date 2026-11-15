@@ -1,0 +1,22 @@
+# Environment
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Datasets (downloaded locally)
+data/*
+!data/kitti/
+data/kitti/*
+!data/kitti/subset_1500.txt
+
+# Model weights downloaded by Ultralytics / HF
+*.pt
+*.pth
+
+# Results: keep only small, reportable files
+results/**/predictions.json
+results/**/*.png
+results/**/*.jpg
+results/smoke/
+results/kitti_gt_check/
