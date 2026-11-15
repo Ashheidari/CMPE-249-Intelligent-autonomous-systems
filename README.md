@@ -31,3 +31,15 @@ Verify with `.venv/bin/python scripts/check_kitti.py` (expects 7,481 paired fram
 `DontCare` present).
 
 Every command run through `scripts/log_cmd.sh` is appended to `logs/commands.log`.
+
+### 1. Detector interface + smoke test
+```bash
+scripts/smoke_test.sh            # optional: --device cpu, --models yolo11s
+```
+Runs Faster R-CNN, YOLO11s and Grounding DINO on the first 5 COCO val2017 images (by id) and
+writes visualizations to `results/smoke/<model>/` plus `results/smoke/summary.json` (device,
+per-image time, detection counts, and the fraction of confident detections matching GT).
+Weights download on first use: torchvision → `~/.cache/torch`, Ultralytics → `weights/yolo11s.pt`,
+Hugging Face → `~/.cache/huggingface`. Per-model settings live in `configs/models.yaml`.
+All models share the interface in `src/models/base.py` and return class *names*, boxes as
+absolute-pixel `xyxy` in original image coordinates.

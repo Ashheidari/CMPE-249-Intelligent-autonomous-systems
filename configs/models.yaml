@@ -1,0 +1,29 @@
+# Per-model settings. "eval" thresholds are deliberately low for mAP (COCO maxDets=100);
+# visualizations use display_thresh instead.
+display_thresh: 0.3
+
+faster_rcnn:
+  weights: COCO_V1                  # torchvision FasterRCNN_ResNet50_FPN_V2_Weights
+  box_score_thresh: 0.001
+  box_detections_per_img: 100
+  # input size is torchvision's internal resize: min side 800, max side 1333
+
+yolo11s:
+  checkpoint: weights/yolo11s.pt    # auto-downloaded by Ultralytics
+  imgsz: 640
+  conf: 0.001
+  iou: 0.7                          # NMS IoU
+  max_det: 100
+
+gdino:
+  checkpoint: IDEA-Research/grounding-dino-tiny
+  box_threshold: 0.05
+  text_threshold: 0.05
+  chunk_size: 20                    # 80 COCO classes -> 4 prompts
+  chunk_nms_iou: 0.5                # class-wise NMS after merging chunks (only if >1 chunk)
+  max_det: 100
+  max_text_tokens: 256
+  # How a box gets its class (see src/models/grounding_dino.py):
+  #   tokens: per-class score = mean sigmoid over the class's prompt tokens (official GDINO COCO eval)
+  #   phrase: HF post_process_grounded_object_detection phrase -> class-name string matching
+  label_assignment: tokens

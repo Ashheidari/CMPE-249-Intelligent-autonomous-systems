@@ -9,3 +9,4 @@
 [2026-11-15 12:59:11] .venv/bin/python scripts/check_kitti.py
 [2026-11-15 17:04:44] .venv/bin/python scripts/check_kitti.py
 [2026-11-15 17:04:55] .venv/bin/python scripts/check_kitti.py
+[2026-11-15 17:14:17] .venv/bin/python scripts/smoke_test.py
