@@ -35,3 +35,42 @@ def draw_detections(image: Image.Image, det: dict, thresh: float = 0.3, title: s
         d.rectangle([0, 0, tb[2] + 6, tb[3] + 6], fill="white")
         d.text((4, 4), title, fill="black", font=font)
     return img
+
+
+def _dashed_rect(d: ImageDraw.ImageDraw, box: list[float], color, width: int = 2, dash: int = 6) -> None:
+    """Draw a dashed rectangle (PIL has no dashed lines)."""
+    x0, y0, x1, y1 = box
+    for (ax, ay, bx, by) in [(x0, y0, x1, y0), (x1, y0, x1, y1), (x1, y1, x0, y1), (x0, y1, x0, y0)]:
+        length = max(abs(bx - ax), abs(by - ay))
+        n = max(1, int(length // dash))
+        for i in range(0, n, 2):
+            t0, t1 = i / n, min(1.0, (i + 1) / n)
+            d.line([ax + (bx - ax) * t0, ay + (by - ay) * t0, ax + (bx - ax) * t1, ay + (by - ay) * t1],
+                   fill=color, width=width)
+
+
+def draw_gt(image: Image.Image, anns: list[dict], cat_names: dict[int, str], title: str | None = None) -> Image.Image:
+    """Draw COCO-format GT (bbox xywh). Evaluated boxes solid with class name; ignore
+    regions (iscrowd=1) dashed gray with their KITTI type (drawn once even if replicated per class)."""
+    img = image.convert("RGB").copy()
+    d = ImageDraw.Draw(img)
+    font = ImageFont.load_default(size=12)
+    seen = set()
+    for a in anns:
+        x, y, w, h = a["bbox"]
+        box = [x, y, x + w, y + h]
+        if a["iscrowd"]:
+            if tuple(box) in seen:
+                continue
+            seen.add(tuple(box))
+            _dashed_rect(d, box, (200, 200, 200))
+            d.text((x + 2, y + 1), a.get("kitti_type", "ignore"), fill=(230, 230, 230), font=font)
+        else:
+            c = class_color(cat_names[a["category_id"]])
+            d.rectangle(box, outline=c, width=2)
+            d.text((x + 2, y - 13 if y > 13 else y + 1), cat_names[a["category_id"]], fill=c, font=font)
+    if title:
+        tb = d.textbbox((4, 4), title, font=font)
+        d.rectangle([0, 0, tb[2] + 6, tb[3] + 6], fill="white")
+        d.text((4, 4), title, fill="black", font=font)
+    return img

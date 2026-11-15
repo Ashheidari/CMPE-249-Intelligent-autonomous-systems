@@ -43,3 +43,17 @@ Weights download on first use: torchvision → `~/.cache/torch`, Ultralytics →
 Hugging Face → `~/.cache/huggingface`. Per-model settings live in `configs/models.yaml`.
 All models share the interface in `src/models/base.py` and return class *names*, boxes as
 absolute-pixel `xyxy` in original image coordinates.
+
+### 2. KITTI → COCO ground truth
+```bash
+scripts/m2_kitti.sh
+```
+- Uses the fixed 1,500-frame subset in `data/kitti/subset_1500.txt` (drawn once with seed 42 and
+  committed; it is reused, never regenerated).
+- Writes `data/kitti/annotations/kitti_subset_coco.json` with COCO's own category ids
+  (person=1, car=3, truck=8), `area = w*h`, and KITTI `truncated` / `occluded` per box.
+- Label policy: `configs/kitti_mapping.yaml`. `ignore` types become `iscrowd=1` ignore regions,
+  written once per evaluated class because COCOeval matches per category. For another policy,
+  run: `.venv/bin/python -m src.datasets.kitti_to_coco --mapping <yaml> --out <json> --stats <md>`.
+- Outputs `results/kitti_stats.md` and 20 GT renders in `results/kitti_gt_check/`. It also checks
+  that GT-as-predictions scores AP 1.0, with and without extra detections on ignore regions.

@@ -10,3 +10,5 @@
 [2026-11-15 17:04:44] .venv/bin/python scripts/check_kitti.py
 [2026-11-15 17:04:55] .venv/bin/python scripts/check_kitti.py
 [2026-11-15 17:14:17] .venv/bin/python scripts/smoke_test.py
+[2026-11-15 17:23:50] .venv/bin/python -m src.datasets.kitti_to_coco
+[2026-11-15 17:23:50] .venv/bin/python scripts/kitti_gt_check.py

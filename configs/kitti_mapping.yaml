@@ -1,0 +1,13 @@
+# KITTI type -> COCO category name used for evaluation, or "ignore".
+# "ignore" boxes become COCO ignore regions (iscrowd=1): detections on them are neither TP nor FP.
+eval_classes: [car, person, truck]   # COCO names; written with COCO's own ids (car=3, person=1, truck=8)
+mapping:
+  Car: car
+  Pedestrian: person
+  Person_sitting: person
+  Truck: truck
+  Van: ignore            # options: car | ignore   (USER DECISION; M6 re-evaluates with Van: car)
+  Cyclist: ignore        # options: person | ignore
+  Tram: ignore
+  Misc: ignore
+  DontCare: ignore
