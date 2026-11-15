@@ -12,3 +12,20 @@
 [2026-11-15 17:14:17] .venv/bin/python scripts/smoke_test.py
 [2026-11-15 17:23:50] .venv/bin/python -m src.datasets.kitti_to_coco
 [2026-11-15 17:23:50] .venv/bin/python scripts/kitti_gt_check.py
+[2026-11-15 17:31:00] .venv/bin/python -m src.eval.run_inference --model faster_rcnn --dataset coco --limit 200
+[2026-11-15 17:31:55] .venv/bin/python -m src.eval.coco_eval --run results/faster_rcnn_coco_limit200
+[2026-11-15 17:31:56] .venv/bin/python -m src.eval.run_inference --model faster_rcnn --dataset kitti --limit 200
+[2026-11-15 17:32:40] .venv/bin/python -m src.eval.coco_eval --run results/faster_rcnn_kitti_limit200
+[2026-11-15 17:32:41] .venv/bin/python -m src.eval.run_inference --model yolo11s --dataset coco --limit 200
+[2026-11-15 17:32:48] .venv/bin/python -m src.eval.coco_eval --run results/yolo11s_coco_limit200
+[2026-11-15 17:32:49] .venv/bin/python -m src.eval.run_inference --model yolo11s --dataset kitti --limit 200
+[2026-11-15 17:32:54] .venv/bin/python -m src.eval.coco_eval --run results/yolo11s_kitti_limit200
+[2026-11-15 17:32:55] .venv/bin/python -m src.eval.run_inference --model gdino --dataset coco --limit 200
+[2026-11-15 17:42:18] .venv/bin/python -m src.eval.coco_eval --run results/gdino_coco_limit200
+[2026-11-15 17:42:19] .venv/bin/python -m src.eval.run_inference --model gdino --dataset kitti --limit 200
+[2026-11-15 17:48:10] .venv/bin/python -m src.eval.coco_eval --run results/gdino_kitti_limit200
+[2026-11-15 17:48:20] .venv/bin/python -m src.eval.run_inference --model yolo11s --dataset coco
+[2026-11-15 17:49:39] .venv/bin/python -m src.eval.coco_eval --run results/yolo11s_coco
+[2026-11-15 17:49:50] .venv/bin/python scripts/yolo_crosscheck.py
+[2026-11-15 17:50:12] .venv/bin/python scripts/yolo_crosscheck.py
+[2026-11-15 17:54:26] .venv/bin/python scripts/yolo_crosscheck.py

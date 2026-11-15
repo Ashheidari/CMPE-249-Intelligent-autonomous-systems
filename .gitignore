@@ -16,6 +16,7 @@ data/kitti/*
 
 # Results: keep only small, reportable files
 results/**/predictions.json
+results/**/predictions.partial.jsonl
 results/**/*.png
 results/**/*.jpg
 results/smoke/

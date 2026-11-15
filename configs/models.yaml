@@ -13,6 +13,8 @@ yolo11s:
   imgsz: 640
   conf: 0.001
   iou: 0.7                          # NMS IoU
+  # NMS keeps one class per box (model.predict default, multi_label=False). Ultralytics val uses
+  # multi_label=True, worth ~+0.6 AP on COCO; kept single-label on purpose (see M3 cross-check).
   max_det: 100
 
 gdino:

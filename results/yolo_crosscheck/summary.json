@@ -1,0 +1,55 @@
+{
+  "validator_settings": {
+    "imgsz": 640,
+    "conf": 0.001,
+    "iou": 0.7,
+    "max_det": 100,
+    "batch": 1,
+    "device": "mps"
+  },
+  "n_predictions": {
+    "multi_label": 344083,
+    "single_label": 303833,
+    "ours": 314556
+  },
+  "results": {
+    "A_ultralytics_metric (multi_label NMS)": {
+      "AP": 0.46200300175545905,
+      "AP50": 0.6288740814229399
+    },
+    "B_pycocotools_on_ultralytics_preds (multi_label NMS)": {
+      "AP": 0.4676442275768897,
+      "AP50": 0.6351549536606779,
+      "AP75": 0.5050158208600822,
+      "APs": 0.2882079000881836,
+      "APm": 0.5152527351854739,
+      "APl": 0.6441163842444495
+    },
+    "A_ultralytics_metric (single_label NMS)": {
+      "AP": 0.45624017482729473,
+      "AP50": 0.620913302225677
+    },
+    "B_pycocotools_on_ultralytics_preds (single_label NMS)": {
+      "AP": 0.46172724908891155,
+      "AP50": 0.6270388626523605,
+      "AP75": 0.4983433473645691,
+      "APs": 0.28230970696002383,
+      "APm": 0.5085653377988144,
+      "APl": 0.6360747290738915
+    },
+    "C_our_pipeline (model.predict, single_label NMS)": {
+      "AP": 0.4550958367493388,
+      "AP50": 0.6196716369788526,
+      "AP75": 0.49208966641527147,
+      "APs": 0.2761400430324371,
+      "APm": 0.5008081166034849,
+      "APl": 0.624754463638825
+    }
+  },
+  "diff_AP": {
+    "C - A_ultralytics_metric (multi_label NMS)": -0.006907165006120264,
+    "C - B_pycocotools_on_ultralytics_preds (multi_label NMS)": -0.012548390827550937,
+    "C - A_ultralytics_metric (single_label NMS)": -0.001144338077955942,
+    "C - B_pycocotools_on_ultralytics_preds (single_label NMS)": -0.006631412339572762
+  }
+}

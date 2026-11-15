@@ -57,3 +57,18 @@ scripts/m2_kitti.sh
   run: `.venv/bin/python -m src.datasets.kitti_to_coco --mapping <yaml> --out <json> --stats <md>`.
 - Outputs `results/kitti_stats.md` and 20 GT renders in `results/kitti_gt_check/`. It also checks
   that GT-as-predictions scores AP 1.0, with and without extra detections on ignore regions.
+
+### 3. Shared COCO-style evaluation
+```bash
+scripts/m3_eval.sh            # or: scripts/m3_eval.sh limit | crosscheck
+```
+- `python -m src.eval.run_inference --model {faster_rcnn,yolo11s,gdino} --dataset {coco,kitti} [--limit N]`
+  writes `results/<run_id>/predictions.json` (COCO results format, `bbox` = `[x, y, w, h]`) and
+  `config.json`. `run_id` defaults to `<model>_<dataset>[_limit<N>]`. Every model gets the 80 COCO
+  classes on both datasets. On KITTI, predictions outside car/person/truck are dropped and counted.
+  An interrupted run resumes from `predictions.partial.jsonl`.
+- `python -m src.eval.coco_eval --run results/<run_id> [--cat-ids ...]` runs pycocotools
+  `COCOeval(bbox)` and writes `metrics.json`: the 12 standard stats plus per-class AP / AP50.
+- `scripts/yolo_crosscheck.py` compares YOLO11s through our pipeline against Ultralytics' own
+  validator on all 5,000 COCO images. It builds YOLO-format labels in `data/coco_yolo/` once.
+  Output: `results/yolo_crosscheck/crosscheck.md`.
