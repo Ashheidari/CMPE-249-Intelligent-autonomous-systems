@@ -1,51 +1,68 @@
-"""Verify the KITTI 2D object training split is in place.
+"""Verify the KITTI 2D-object labeled training split is in place.
 
-Expects data/kitti/training/image_2/*.png and data/kitti/training/label_2/*.txt,
-7,481 of each with matching stems. Exits 0 if OK, 1 with download instructions otherwise.
+Default root is data/kitti (Kaggle re-pack with train/ + val/); the official
+training/{image_2,label_2} layout is also accepted. Checks: 7,481 frames, every frame
+has both an image and a label, every label line has the 15 KITTI fields, and the
+DontCare regions are present. Exits 0 if OK, 1 with instructions otherwise.
 
-Usage: .venv/bin/python scripts/check_kitti.py
+Usage: .venv/bin/python scripts/check_kitti.py [--root data/kitti]
 """
 from __future__ import annotations
 
+import argparse
 import sys
+from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-KITTI = ROOT / "data" / "kitti" / "training"
-EXPECTED = 7481
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from src.datasets.kitti_files import DEFAULT_KITTI_ROOT, EXPECTED_FRAMES, kitti_index  # noqa: E402
 
 INSTRUCTIONS = f"""
-KITTI is not (fully) present. It requires registration, so download it manually:
-
-  1. Register / log in at https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d
-  2. Download:
-       - "Download left color images of object data set (12 GB)"  -> data_object_image_2.zip
-       - "Download training labels of object data set (5 MB)"     -> data_object_label_2.zip
-  3. Unzip both into {ROOT / 'data' / 'kitti'}:
-       mkdir -p data/kitti
-       unzip data_object_image_2.zip -d data/kitti
-       unzip data_object_label_2.zip -d data/kitti
-     giving data/kitti/training/image_2/ and data/kitti/training/label_2/
-  4. Re-run: .venv/bin/python scripts/check_kitti.py
+KITTI is not (fully) present. Get the labeled training split with the ORIGINAL 15-field
+labels (Ultralytics' YOLO-format re-pack is not suitable: no DontCare/occlusion fields).
+Either:
+  - official: register at https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d,
+    download data_object_image_2.zip + data_object_label_2.zip, unzip both into a folder
+    (giving training/image_2 and training/label_2), or
+  - the Kaggle re-pack with train/ and val/ {{images,labels}} folders,
+and pass that folder with --root (default {DEFAULT_KITTI_ROOT}).
 """
 
 
 def main() -> int:
-    img_dir, lbl_dir = KITTI / "image_2", KITTI / "label_2"
-    images = {p.stem for p in img_dir.glob("*.png")} if img_dir.is_dir() else set()
-    labels = {p.stem for p in lbl_dir.glob("*.txt")} if lbl_dir.is_dir() else set()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--root", type=Path, default=DEFAULT_KITTI_ROOT)
+    args = ap.parse_args()
 
-    print(f"{img_dir}: {len(images)} images (expected {EXPECTED})")
-    print(f"{lbl_dir}: {len(labels)} labels (expected {EXPECTED})")
+    try:
+        index = kitti_index(args.root)
+    except FileNotFoundError as e:
+        print(e, INSTRUCTIONS, sep="\n")
+        return 1
 
-    ok = len(images) == EXPECTED and len(labels) == EXPECTED and images == labels
+    no_img = [k for k, (img, _) in index.items() if img is None]
+    no_lbl = [k for k, (_, lbl) in index.items() if lbl is None]
+    paired = [(img, lbl) for img, lbl in index.values() if img and lbl]
+    print(f"root: {args.root}")
+    print(f"frames: {len(index)} (expected {EXPECTED_FRAMES}), paired: {len(paired)}, "
+          f"missing image: {len(no_img)}, missing label: {len(no_lbl)}")
+
+    fields, classes = Counter(), Counter()
+    for _, lbl in paired:
+        for line in lbl.read_text().splitlines():
+            if line.strip():
+                parts = line.split()
+                fields[len(parts)] += 1
+                classes[parts[0]] += 1
+    print(f"fields per label line: {dict(fields)}")
+    print("boxes per type: " + ", ".join(f"{k}={v}" for k, v in sorted(classes.items())))
+
+    ok = (len(paired) == len(index) == EXPECTED_FRAMES
+          and set(fields) == {15} and classes["DontCare"] > 0)
     if ok:
         print("KITTI check passed.")
         return 0
-    if images and labels and images != labels:
-        print(f"Mismatch: {len(images - labels)} images without labels, "
-              f"{len(labels - images)} labels without images.")
-    print(INSTRUCTIONS)
+    print("KITTI check FAILED.", INSTRUCTIONS)
     return 1
 
 

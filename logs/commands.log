@@ -6,3 +6,6 @@
 [2026-11-15 12:37:51] scripts/download_coco.sh
 [2026-11-15 12:39:37] .venv/bin/python scripts/check_kitti.py
 [2026-11-15 12:39:59] .venv/bin/python scripts/check_coco.py
+[2026-11-15 12:59:11] .venv/bin/python scripts/check_kitti.py
+[2026-11-15 17:04:44] .venv/bin/python scripts/check_kitti.py
+[2026-11-15 17:04:55] .venv/bin/python scripts/check_kitti.py
