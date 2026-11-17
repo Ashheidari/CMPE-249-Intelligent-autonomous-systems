@@ -1,0 +1,12 @@
+# Main results
+
+| model | dataset | images | AP | AP50 | AP75 | APs | APm | APl | AR1 | AR10 | AR100 | ARs | ARm | ARl | device | predict ms/img |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Faster R-CNN R50-FPN v2 | COCO val2017 | 5000 | 46.9 | 67.9 | 51.4 | 30.9 | 50.8 | 60.3 | 37.0 | 59.6 | 63.0 | 47.3 | 66.5 | 77.4 | mps | 260.0 |
+| Faster R-CNN R50-FPN v2 | KITTI subset | 1500 | 37.8 | 68.7 | 37.8 | 25.2 | 35.9 | 47.8 | 26.0 | 52.6 | 55.1 | 57.3 | 53.9 | 56.5 | mps | 196.5 |
+| YOLO11s | COCO val2017 | 5000 | 45.5 | 62.0 | 49.2 | 27.6 | 50.1 | 62.5 | 34.7 | 56.3 | 60.2 | 40.1 | 65.9 | 76.8 | mps | 13.2 |
+| YOLO11s | KITTI subset | 1500 | 31.4 | 59.0 | 29.8 | 21.3 | 29.1 | 43.5 | 21.3 | 43.1 | 45.8 | 40.4 | 44.2 | 54.0 | mps | 8.2 |
+| Grounding DINO tiny | COCO val2017 | 5000 | 46.7 | 63.2 | 50.4 | 32.5 | 49.9 | 61.3 | 38.4 | 63.0 | 66.3 | 51.9 | 69.8 | 81.7 | mps | 2751.3 |
+| Grounding DINO tiny | KITTI subset | 1500 | 36.5 | 66.8 | 36.1 | 29.8 | 34.0 | 46.6 | 26.0 | 52.7 | 54.3 | 59.0 | 51.8 | 57.2 | mps | 1730.4 |
+
+AP/AR in %, from pycocotools COCOeval (bbox, maxDets=100). COCO: 80 classes; KITTI: car, person, truck with Van/Cyclist/Tram/Misc/DontCare as ignore regions. predict ms/img is the mean time of one predict() call during the evaluation run (batch 1), not the M5 benchmark.

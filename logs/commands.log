@@ -29,3 +29,14 @@
 [2026-11-15 17:49:50] .venv/bin/python scripts/yolo_crosscheck.py
 [2026-11-15 17:50:12] .venv/bin/python scripts/yolo_crosscheck.py
 [2026-11-15 17:54:26] .venv/bin/python scripts/yolo_crosscheck.py
+[2026-11-15 18:23:58] .venv/bin/python -m src.eval.run_inference --model faster_rcnn --dataset coco
+[2026-11-15 18:46:04] .venv/bin/python -m src.eval.coco_eval --run results/faster_rcnn_coco
+[2026-11-15 19:09:07] .venv/bin/python -m src.eval.run_inference --model faster_rcnn --dataset kitti
+[2026-11-15 19:14:18] .venv/bin/python -m src.eval.coco_eval --run results/faster_rcnn_kitti
+[2026-11-15 19:18:33] .venv/bin/python -m src.eval.run_inference --model yolo11s --dataset kitti
+[2026-11-15 19:18:57] .venv/bin/python -m src.eval.coco_eval --run results/yolo11s_kitti
+[2026-11-15 19:20:11] .venv/bin/python -m src.eval.run_inference --model gdino --dataset kitti
+[2026-11-15 20:03:49] .venv/bin/python -m src.eval.coco_eval --run results/gdino_kitti
+[2026-11-15 21:41:34] .venv/bin/python -m src.eval.run_inference --model gdino --dataset coco
+[2026-11-16 01:31:25] .venv/bin/python -m src.eval.coco_eval --run results/gdino_coco
+[2026-11-16 21:27:29] .venv/bin/python -m src.analysis.tables

@@ -72,3 +72,13 @@ scripts/m3_eval.sh            # or: scripts/m3_eval.sh limit | crosscheck
 - `scripts/yolo_crosscheck.py` compares YOLO11s through our pipeline against Ultralytics' own
   validator on all 5,000 COCO images. It builds YOLO-format labels in `data/coco_yolo/` once.
   Output: `results/yolo_crosscheck/crosscheck.md`.
+
+### 4. Full runs and results tables
+```bash
+scripts/m4_full_runs.sh                  # all 6 runs (~5.5 h on an M5, mostly Grounding DINO on COCO)
+scripts/m4_full_runs.sh gdino kitti      # or one model x dataset at a time
+.venv/bin/python -m src.analysis.tables  # regenerate tables from results/*/metrics.json
+```
+Writes `results/<model>_<dataset>/{predictions,config,metrics}.json` for the full sets, logs to
+`logs/m4/`, and tables to `report/tables/`: `main_results.md/.csv`, `per_class_kitti.md`, and
+`published_check.md` (our COCO AP vs. the published value for each checkpoint).
