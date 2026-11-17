@@ -7,6 +7,9 @@ M6 figures (report/figures/):
   ap_by_size.png           APs / APm / APl on the shared classes, COCO vs. KITTI, per model
   recall_vs_occlusion.png  KITTI recall at IoU 0.5 by occlusion level, car and person
   ap_vs_iou.png            per-class AP at each IoU threshold 0.50..0.95, COCO vs. KITTI
+M7 figures:
+  speed_accuracy.png       AP vs. median latency (log x), COCO and KITTI, annotated with peak memory
+  latency_breakdown.png    stacked preprocess / forward / postprocess latency, one panel per model
 
 Color always encodes the model (validated categorical slots 1-3); COCO is drawn in neutral gray
 or dashed so color never means "dataset". Exact numbers are in the Markdown tables in report/tables/.
@@ -143,11 +146,81 @@ def ap_vs_iou() -> None:
     save(fig, "ap_vs_iou.png")
 
 
+def mix(hex_color: str, other: str, t: float) -> str:
+    """Blend hex_color toward other by fraction t (0 = unchanged)."""
+    a = np.array([int(hex_color[i:i + 2], 16) for i in (1, 3, 5)])
+    b = np.array([int(other[i:i + 2], 16) for i in (1, 3, 5)])
+    return "#" + "".join(f"{int(round(v)):02x}" for v in (1 - t) * a + t * b)
+
+
+def speed_accuracy() -> None:
+    res = load(RESULTS / "analysis" / "speed_accuracy.json")
+    fig, ax = plt.subplots(figsize=(8, 4.6))
+    ax.grid(True, axis="both", which="major")
+    for m in MODELS:
+        pts = {d: (res[m][d]["latency_total_ms_median"], 100 * res[m][d]["AP"], res[m][d]["peak_driver_mb"])
+               for d in ("coco", "kitti")}
+        ax.plot([pts["coco"][0], pts["kitti"][0]], [pts["coco"][1], pts["kitti"][1]], color=GRID, lw=1.5, zorder=1)
+        for d, marker in (("coco", "o"), ("kitti", "s")):
+            x, y, mem = pts[d]
+            ax.scatter(x, y, s=90, marker=marker, color=COLOR[m], edgecolor=SURFACE, linewidth=2, zorder=3)
+            ax.annotate(f"{mem:,.0f} MB", (x, y), xytext=(9, -4), textcoords="offset points",
+                        fontsize=8, color=INK2)
+        x, y, _ = pts["coco"]
+        ax.annotate(MODELS[m], (x, y), xytext=(0, 11), textcoords="offset points", ha="center",
+                    fontsize=9, fontweight="bold", color=INK)
+    ax.set_xscale("log")
+    ax.set_xlim(5, 6000)
+    ax.set_ylim(25, 52)
+    ax.set_xlabel("median latency per image, batch 1, Apple M5 MPS (ms, log scale)")
+    ax.set_ylabel("AP (%)")
+    from matplotlib.lines import Line2D
+    handles = [Line2D([], [], marker="o", ls="", color=INK2, markersize=8, label="COCO val2017 (80 classes)"),
+               Line2D([], [], marker="s", ls="", color=INK2, markersize=8, label="KITTI subset (car/person/truck)")]
+    handles += [Line2D([], [], marker="o", ls="", color=COLOR[m], markersize=8, label=MODELS[m]) for m in MODELS]
+    ax.legend(handles=handles, loc="lower right", fontsize=8)
+    ax.set_title("Speed vs. accuracy (labels next to points: peak MPS driver memory)", loc="left")
+    fig.tight_layout()
+    save(fig, "speed_accuracy.png")
+
+
+def latency_breakdown() -> None:
+    res = load(RESULTS / "analysis" / "speed_accuracy.json")
+    stages = ["preprocess", "forward", "postprocess"]
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.8))
+    for ax, m in zip(axes, MODELS):
+        shades = [mix(COLOR[m], "#ffffff", 0.6), COLOR[m], mix(COLOR[m], "#000000", 0.4)]
+        top = 0
+        for i, d in enumerate(("coco", "kitti")):
+            bottom = 0.0
+            lat = res[m][d]["latency_ms"]
+            for st, c in zip(stages, shades):
+                ax.bar(i, lat[st], 0.5, bottom=bottom, color=c, edgecolor=SURFACE, linewidth=2,
+                       label=st if i == 0 else None)
+                bottom += lat[st]
+            top = max(top, bottom)
+            ax.annotate(f"{bottom:.1f} ms\npre {lat['preprocess']:.1f} · post {lat['postprocess']:.1f}",
+                        (i, bottom), xytext=(0, 4), textcoords="offset points", ha="center", fontsize=8, color=INK2)
+        ax.set_ylim(0, top * 1.25)
+        ax.set_xticks([0, 1], ["COCO", "KITTI"])
+        ax.set_xlim(-0.6, 1.6)
+        ax.tick_params(axis="x", length=0)
+        ax.set_title(MODELS[m])
+        ax.legend(loc="upper right", fontsize=8, handlelength=1, handleheight=1)
+    axes[0].set_ylabel("latency per image (ms)")
+    fig.suptitle("Latency breakdown (mean, batch 1, MPS) — note each panel has its own scale",
+                 x=0.01, ha="left", fontweight="bold")
+    fig.tight_layout()
+    save(fig, "latency_breakdown.png")
+
+
 def main() -> None:
     per_class_ap()
     ap_by_size()
     recall_vs_occlusion()
     ap_vs_iou()
+    speed_accuracy()
+    latency_breakdown()
 
 
 if __name__ == "__main__":

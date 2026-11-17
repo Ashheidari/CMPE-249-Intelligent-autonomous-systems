@@ -1,0 +1,146 @@
+{
+  "faster_rcnn": {
+    "coco": {
+      "AP": 0.46941851237935606,
+      "AP50": 0.6790154994264855,
+      "latency_ms": {
+        "preprocess": 2.7076949534239247,
+        "forward": 250.87576061021537,
+        "postprocess": 3.8915531331440434
+      },
+      "latency_total_ms_mean": 257.47500869678333,
+      "latency_total_ms_median": 255.85410447092727,
+      "fps": 3.8838720894176366,
+      "peak_driver_mb": 2249.8125,
+      "peak_alloc_mb": 167.071044921875,
+      "params_M": 43.712278,
+      "input_megapixels_mean": 0.90860544,
+      "original_megapixels_mean": 0.27576115,
+      "most_common_input_hw": [
+        800,
+        1216
+      ],
+      "n_distinct_shapes": 25,
+      "forward_ms_per_input_mpx": 276.11078424779777
+    },
+    "kitti": {
+      "AP": 0.37816651593410316,
+      "AP50": 0.6871696425075947,
+      "latency_ms": {
+        "preprocess": 2.5299489550525323,
+        "forward": 194.85678750788793,
+        "postprocess": 3.6523431196110323
+      },
+      "latency_total_ms_mean": 201.0390795825515,
+      "latency_total_ms_median": 200.97874995553866,
+      "fps": 4.974157273682582,
+      "peak_driver_mb": 1209.6875,
+      "peak_alloc_mb": 167.071044921875,
+      "params_M": 43.712278,
+      "input_megapixels_mean": 0.559104,
+      "original_megapixels_mean": 0.46444404,
+      "most_common_input_hw": [
+        416,
+        1344
+      ],
+      "n_distinct_shapes": 1,
+      "forward_ms_per_input_mpx": 348.5161750012304
+    }
+  },
+  "yolo11s": {
+    "coco": {
+      "AP": 0.4550958367493388,
+      "AP50": 0.6196716369788526,
+      "latency_ms": {
+        "preprocess": 1.3499070500256494,
+        "forward": 10.25049352669157,
+        "postprocess": 1.5807714825496078
+      },
+      "latency_total_ms_mean": 13.181172059266828,
+      "latency_total_ms_median": 13.174062012694776,
+      "fps": 75.865787617647,
+      "peak_driver_mb": 183.1875,
+      "peak_alloc_mb": 36.125244140625,
+      "params_M": 9.458752,
+      "input_megapixels_mean": 0.3016704,
+      "original_megapixels_mean": 0.27576115,
+      "most_common_input_hw": [
+        448,
+        640
+      ],
+      "n_distinct_shapes": 17,
+      "forward_ms_per_input_mpx": 33.97911603754154
+    },
+    "kitti": {
+      "AP": 0.31410859081387654,
+      "AP50": 0.5903346662237847,
+      "latency_ms": {
+        "preprocess": 1.5169116866309196,
+        "forward": 5.216254613478668,
+        "postprocess": 1.5418504149420187
+      },
+      "latency_total_ms_mean": 8.275016715051606,
+      "latency_total_ms_median": 8.266875054687262,
+      "fps": 120.84567734843102,
+      "peak_driver_mb": 117.78125,
+      "peak_alloc_mb": 36.06298828125,
+      "params_M": 9.458752,
+      "input_megapixels_mean": 0.14336,
+      "original_megapixels_mean": 0.46444404,
+      "most_common_input_hw": [
+        224,
+        640
+      ],
+      "n_distinct_shapes": 1,
+      "forward_ms_per_input_mpx": 36.38570461410902
+    }
+  },
+  "gdino": {
+    "coco": {
+      "AP": 0.46683152083257734,
+      "AP50": 0.6315864630598784,
+      "latency_ms": {
+        "preprocess": 15.719364155083895,
+        "forward": 2789.627681247075,
+        "postprocess": 23.15236707276199
+      },
+      "latency_total_ms_mean": 2828.499412474921,
+      "latency_total_ms_median": 2786.6018540225923,
+      "fps": 0.35354435485811386,
+      "peak_driver_mb": 5408.546875,
+      "peak_alloc_mb": 659.029541015625,
+      "params_M": 172.250626,
+      "input_megapixels_mean": 0.893381035,
+      "original_megapixels_mean": 0.27576115,
+      "most_common_input_hw": [
+        800,
+        1066
+      ],
+      "n_distinct_shapes": 62,
+      "forward_ms_per_input_mpx": 3122.5508175770433
+    },
+    "kitti": {
+      "AP": 0.36450854176637565,
+      "AP50": 0.6681941742878746,
+      "latency_ms": {
+        "preprocess": 7.32892043015454,
+        "forward": 1761.3943687459687,
+        "postprocess": 21.535131251439452
+      },
+      "latency_total_ms_mean": 1790.2584204275627,
+      "latency_total_ms_median": 1781.6902085323818,
+      "fps": 0.5585785764723132,
+      "peak_driver_mb": 3336.015625,
+      "peak_alloc_mb": 659.029541015625,
+      "params_M": 172.250626,
+      "input_megapixels_mean": 0.536165925,
+      "original_megapixels_mean": 0.46444404,
+      "most_common_input_hw": [
+        402,
+        1333
+      ],
+      "n_distinct_shapes": 3,
+      "forward_ms_per_input_mpx": 3285.1665624703182
+    }
+  }
+}

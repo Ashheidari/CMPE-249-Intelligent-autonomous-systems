@@ -93,3 +93,5 @@
 [2026-11-17 07:51:40] .venv/bin/python -m src.analysis.tables
 [2026-11-17 07:52:16] .venv/bin/python -m src.analysis.plots
 [2026-11-17 07:52:56] .venv/bin/python -m src.analysis.plots
+[2026-11-17 07:56:19] .venv/bin/python -m src.analysis.speed_accuracy
+[2026-11-17 07:57:02] .venv/bin/python -m src.analysis.plots

@@ -112,3 +112,11 @@ It also computes KITTI recall by occlusion and truncation with a greedy IoU ≥ 
 re-scores KITTI under the Van: car and Cyclist: person label policies. Outputs:
 `results/analysis/generalization.json`, `report/tables/generalization_*.md`, figures in `report/figures/`,
 and the write-up `report/analysis_generalization.md`.
+
+### 7. Analysis 2: speed–accuracy tradeoff
+```bash
+.venv/bin/python -m src.analysis.speed_accuracy   # joins M4 AP + M5 latency; measures input sizes, params
+.venv/bin/python -m src.analysis.plots            # adds speed_accuracy.png and latency_breakdown.png
+```
+Outputs: `results/analysis/speed_accuracy.json`, `report/tables/speed_accuracy.md`, the figures, and the
+write-up `report/analysis_speed.md`.
