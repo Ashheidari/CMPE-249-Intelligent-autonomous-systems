@@ -23,19 +23,58 @@
       "category_id": 1,
       "n_gt": 936,
       "AP": 0.2990872702389202,
-      "AP50": 0.6532844465531382
+      "AP50": 0.6532844465531382,
+      "AP75": 0.22035314537913075,
+      "AP_by_iou": [
+        0.6532844465531382,
+        0.6055934352751339,
+        0.5458963970996582,
+        0.4531498824882197,
+        0.35058355900961896,
+        0.22035314537913075,
+        0.11168036779055973,
+        0.04253685529624114,
+        0.007413806186000751,
+        0.0003808073115003808
+      ]
     },
     "car": {
       "category_id": 3,
       "n_gt": 5687,
       "AP": 0.5021207598622448,
-      "AP50": 0.8564166245682594
+      "AP50": 0.8564166245682594,
+      "AP75": 0.5346785771375924,
+      "AP_by_iou": [
+        0.8564166245682594,
+        0.8182979507987528,
+        0.7692366047258024,
+        0.7048600315100125,
+        0.6281720843697434,
+        0.5346785771375924,
+        0.40927542567717357,
+        0.2399508449817386,
+        0.05966290709101909,
+        0.0006565477623536471
+      ]
     },
     "truck": {
       "category_id": 8,
       "n_gt": 199,
       "AP": 0.3332915177011447,
-      "AP50": 0.5518078564013861
+      "AP50": 0.5518078564013861,
+      "AP75": 0.37879574281890777,
+      "AP_by_iou": [
+        0.5518078564013861,
+        0.5382063741681269,
+        0.5161406325595539,
+        0.4629174592711719,
+        0.4132398221057788,
+        0.37879574281890777,
+        0.32327619491724785,
+        0.1287031257271783,
+        0.018479213890962576,
+        0.0013487551511331183
+      ]
     }
   },
   "n_images": 1500,
@@ -45,5 +84,5 @@
     8
   ],
   "n_predictions": 94259,
-  "summary": "Running per image evaluation...\nEvaluate annotation type *bbox*\nDONE (t=2.87s).\nAccumulating evaluation results...\nDONE (t=0.29s).\n Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.378\n Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.687\n Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.378\n Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.252\n Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.359\n Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.478\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.260\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.526\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.551\n Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.573\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.539\n Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.565\n"
+  "summary": "Running per image evaluation...\nEvaluate annotation type *bbox*\nDONE (t=2.90s).\nAccumulating evaluation results...\nDONE (t=0.29s).\n Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.378\n Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.687\n Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.378\n Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.252\n Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.359\n Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.478\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.260\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.526\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.551\n Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.573\n Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.539\n Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.565\n"
 }

@@ -97,3 +97,18 @@ For Grounding DINO, the text encoder is also timed alone. Results are written to
 `results/benchmark/<model>_<dataset>/benchmark.json` and `report/tables/speed.md`.
 Stability is judged on the median: the mean of the first repeat includes one-off MPS kernel compilation
 for COCO input shapes not seen during warm-up.
+
+### 6. Analysis 1: cross-dataset generalization
+```bash
+.venv/bin/python -m src.datasets.kitti_to_coco --mapping configs/kitti_mapping_van_car.yaml \
+    --out data/kitti/annotations/kitti_subset_coco_van_car.json --stats results/analysis/kitti_stats_van_car.md
+.venv/bin/python -m src.datasets.kitti_to_coco --mapping configs/kitti_mapping_cyclist_person.yaml \
+    --out data/kitti/annotations/kitti_subset_coco_cyclist_person.json --stats results/analysis/kitti_stats_cyclist_person.md
+.venv/bin/python -m src.analysis.generalization   # re-evaluates saved predictions only
+.venv/bin/python -m src.analysis.plots
+```
+This re-evaluates COCO on car/person/truck (`results/<model>_coco/metrics_shared3.json`).
+It also computes KITTI recall by occlusion and truncation with a greedy IoU ≥ 0.5 matcher, and
+re-scores KITTI under the Van: car and Cyclist: person label policies. Outputs:
+`results/analysis/generalization.json`, `report/tables/generalization_*.md`, figures in `report/figures/`,
+and the write-up `report/analysis_generalization.md`.

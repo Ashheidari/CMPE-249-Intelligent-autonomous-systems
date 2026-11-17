@@ -80,3 +80,16 @@
 [2026-11-17 07:43:07] .venv/bin/python scripts/mps_shape_effect.py
 [2026-11-17 07:45:02] .venv/bin/python -m src.analysis.tables
 [2026-11-17 07:45:27] .venv/bin/python -m src.analysis.tables
+[2026-11-17 07:48:49] .venv/bin/python -m src.datasets.kitti_to_coco --mapping configs/kitti_mapping_van_car.yaml --out data/kitti/annotations/kitti_subset_coco_van_car.json --stats results/analysis/kitti_stats_van_car.md
+[2026-11-17 07:48:49] .venv/bin/python -m src.datasets.kitti_to_coco --mapping configs/kitti_mapping_cyclist_person.yaml --out data/kitti/annotations/kitti_subset_coco_cyclist_person.json --stats results/analysis/kitti_stats_cyclist_person.md
+[2026-11-17 07:49:35] .venv/bin/python -m src.analysis.generalization
+[2026-11-17 07:50:25] .venv/bin/python -m src.eval.coco_eval --run results/faster_rcnn_coco
+[2026-11-17 07:50:39] .venv/bin/python -m src.eval.coco_eval --run results/faster_rcnn_kitti
+[2026-11-17 07:50:42] .venv/bin/python -m src.eval.coco_eval --run results/yolo11s_coco
+[2026-11-17 07:50:54] .venv/bin/python -m src.eval.coco_eval --run results/yolo11s_kitti
+[2026-11-17 07:50:57] .venv/bin/python -m src.eval.coco_eval --run results/gdino_coco
+[2026-11-17 07:51:10] .venv/bin/python -m src.eval.coco_eval --run results/gdino_kitti
+[2026-11-17 07:51:12] .venv/bin/python -m src.analysis.generalization
+[2026-11-17 07:51:40] .venv/bin/python -m src.analysis.tables
+[2026-11-17 07:52:16] .venv/bin/python -m src.analysis.plots
+[2026-11-17 07:52:56] .venv/bin/python -m src.analysis.plots

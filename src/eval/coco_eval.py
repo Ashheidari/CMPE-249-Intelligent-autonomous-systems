@@ -10,10 +10,10 @@ categories (used in M6 to compare COCO and KITTI on car/person/truck only).
 
 metrics.json contains:
   stats:        the 12 standard COCOeval numbers (AP, AP50, ..., ARl), in [0, 1]
-  per_class:    {class name: {AP, AP50, n_gt}} where
+  per_class:    {class name: {AP, AP50, AP75, AP_by_iou, n_gt}} where
                 AP   = mean of precision[iou, recall, k, area=all, maxDets=100] over all IoU
                        thresholds and recall points, ignoring -1 entries (-1 = no GT for the class),
-                AP50 = the same at IoU 0.50 only.
+                AP50 / AP75 = the same at IoU 0.50 / 0.75 only, AP_by_iou = at each of the 10 IoUs.
                 A class with no (non-crowd) GT in the evaluated images gets null.
 """
 from __future__ import annotations
@@ -69,7 +69,10 @@ def evaluate(gt: COCO, preds: list[dict], img_ids: list[int], cat_ids: list[int]
         n_gt = len(gt.getAnnIds(imgIds=img_ids, catIds=[cid], iscrowd=False))
         per_class[name] = {"category_id": cid, "n_gt": n_gt,
                            "AP": _mean_valid(prec[:, :, k, 0, -1]),
-                           "AP50": _mean_valid(prec[0, :, k, 0, -1])}
+                           "AP50": _mean_valid(prec[0, :, k, 0, -1]),
+                           "AP75": _mean_valid(prec[5, :, k, 0, -1]),
+                           # AP at each IoU threshold 0.50, 0.55, ..., 0.95 (shows where AP is lost)
+                           "AP_by_iou": [_mean_valid(prec[t, :, k, 0, -1]) for t in range(prec.shape[0])]}
     return {"stats": dict(zip(STAT_NAMES, map(float, ev.stats))), "per_class": per_class,
             "n_images": len(img_ids), "cat_ids": cat_ids, "n_predictions": len(preds),
             "summary": buf.getvalue()}
