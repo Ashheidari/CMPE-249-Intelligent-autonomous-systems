@@ -82,3 +82,18 @@ scripts/m4_full_runs.sh gdino kitti      # or one model x dataset at a time
 Writes `results/<model>_<dataset>/{predictions,config,metrics}.json` for the full sets, logs to
 `logs/m4/`, and tables to `report/tables/`: `main_results.md/.csv`, `per_class_kitti.md`, and
 `published_check.md` (our COCO AP vs. the published value for each checkpoint).
+
+### 5. Speed and memory benchmark
+```bash
+scripts/m5_benchmark.sh                  # all 6 (~40 min on an M5), then report/tables/speed.md
+scripts/m5_benchmark.sh yolo11s coco     # or one model x dataset (two separate arguments)
+.venv/bin/python scripts/mps_shape_effect.py   # optional: first-seen input shape cost on MPS
+```
+`src/eval/benchmark.py` runs batch size 1 on a fixed image list: 20 warm-up and 200 timed images, repeated twice.
+It times preprocess, forward and postprocess separately, synchronizing the device before every timestamp.
+Each model wrapper has `preprocess` / `forward` / `postprocess` methods for this. A `--check` pass
+confirms they give the same detections as `predict()`. Peak MPS memory is sampled after each image.
+For Grounding DINO, the text encoder is also timed alone. Results are written to
+`results/benchmark/<model>_<dataset>/benchmark.json` and `report/tables/speed.md`.
+Stability is judged on the median: the mean of the first repeat includes one-off MPS kernel compilation
+for COCO input shapes not seen during warm-up.

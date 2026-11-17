@@ -26,15 +26,46 @@ class FasterRCNN(Detector):
         ).eval().to(device)
         # weights.transforms() only converts PIL -> float tensor in [0, 1], shape [3, H, W];
         # mean/std normalization also happens inside the model.
-        self.preprocess = weights.transforms()
+        self.to_tensor = weights.transforms()
         # Index into the 91-entry torchvision label space ('__background__' and 'N/A' gaps
         # included), so label id k -> COCO class name.
         self.categories: list[str] = weights.meta["categories"]
 
     @torch.no_grad()
     def predict(self, image: Image.Image, class_names: list[str]) -> dict:
-        x = self.preprocess(image.convert("RGB")).to(self.device)  # [3, H, W]
+        x = self.to_tensor(image.convert("RGB")).to(self.device)  # [3, H, W]
         out = self.model([x])[0]  # boxes [N, 4] xyxy original px, scores [N], labels [N]
         labels = [self.categories[i] for i in out["labels"].tolist()]
         return make_result(out["boxes"].cpu().numpy(), out["scores"].cpu().numpy(), labels,
                            class_names, self.cfg["box_detections_per_img"])
+
+    # ---- staged path for the benchmark. Same computation as GeneralizedRCNN.forward in eval mode,
+    # split so that the final per-class NMS (roi_heads.postprocess_detections) is in postprocess.
+    # The RPN's proposal NMS is inside self.model.rpn and therefore stays in forward.
+    @torch.no_grad()
+    def preprocess(self, image: Image.Image, class_names: list[str]) -> dict:
+        x = self.to_tensor(image.convert("RGB")).to(self.device)  # [3, H, W] in [0, 1]
+        images, _ = self.model.transform([x])  # resize (min 800 / max 1333) + normalize, batched
+        return {"images": images, "orig_size": [tuple(x.shape[-2:])], "class_names": class_names}
+
+    @torch.no_grad()
+    def forward(self, inputs: dict):
+        m, images = self.model, inputs["images"]
+        features = m.backbone(images.tensors)
+        proposals, _ = m.rpn(images, features)  # includes proposal NMS
+        rh = m.roi_heads
+        box_feats = rh.box_head(rh.box_roi_pool(features, proposals, images.image_sizes))
+        class_logits, box_regression = rh.box_predictor(box_feats)
+        return class_logits, box_regression, proposals
+
+    @torch.no_grad()
+    def postprocess(self, outputs, inputs: dict) -> dict:
+        class_logits, box_regression, proposals = outputs
+        images = inputs["images"]
+        boxes, scores, labels = self.model.roi_heads.postprocess_detections(
+            class_logits, box_regression, proposals, images.image_sizes)  # decode + score thresh + NMS
+        dets = [{"boxes": boxes[0], "scores": scores[0], "labels": labels[0]}]
+        out = self.model.transform.postprocess(dets, images.image_sizes, inputs["orig_size"])[0]  # -> original px
+        names = [self.categories[i] for i in out["labels"].tolist()]
+        return make_result(out["boxes"].cpu().numpy(), out["scores"].cpu().numpy(), names,
+                           inputs["class_names"], self.cfg["box_detections_per_img"])

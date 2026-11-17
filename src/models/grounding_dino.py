@@ -128,20 +128,37 @@ class GroundingDINO(Detector):
 
     @torch.no_grad()
     def predict(self, image: Image.Image, class_names: list[str]) -> dict:
+        inputs = self.preprocess(image, class_names)
+        return self.postprocess(self.forward(inputs), inputs)
+
+    @torch.no_grad()
+    def preprocess(self, image: Image.Image, class_names: list[str]) -> dict:
+        """Resize + normalize the image; tokenized prompt chunks (cached after the first call) to device."""
         image = image.convert("RGB")
-        W, H = image.size
         chunks = self._prepare_chunks(class_names)
         pix = self.processor.image_processor(image, return_tensors="pt").to(self.device)  # resized + normalized
+        encs = [c["enc"].to(self.device) for c in chunks]
+        return {"pix": pix, "encs": encs, "chunks": chunks, "size": image.size, "class_names": class_names}
+
+    @torch.no_grad()
+    def forward(self, inputs: dict) -> list:
+        """One forward pass per prompt chunk; the text encoder (BERT) runs inside each pass."""
+        return [self.model(**inputs["pix"], **enc) for enc in inputs["encs"]]
+
+    @torch.no_grad()
+    def postprocess(self, outputs: list, inputs: dict) -> dict:
+        """Assign classes per chunk, merge chunks with class-wise NMS, clamp, keep top max_det."""
+        W, H = inputs["size"]
+        class_names = inputs["class_names"]
         assign = self._assign_tokens if self.cfg["label_assignment"] == "tokens" else self._assign_phrase
         all_boxes, all_scores, all_labels = [], [], []
-        for chunk in chunks:
-            out = self.model(**pix, **chunk["enc"].to(self.device))  # text encoder runs here too
+        for out, chunk in zip(outputs, inputs["chunks"]):
             b, s, l = assign(out, chunk, W, H)
             all_boxes.append(b.float())
             all_scores.append(s.float())
             all_labels += l
         boxes, scores = torch.cat(all_boxes), torch.cat(all_scores)
-        if len(chunks) > 1 and self.cfg.get("chunk_nms_iou") and len(scores):
+        if len(inputs["chunks"]) > 1 and self.cfg.get("chunk_nms_iou") and len(scores):
             idx = torch.tensor([class_names.index(n) for n in all_labels], device=boxes.device)
             keep = batched_nms(boxes, scores, idx, self.cfg["chunk_nms_iou"]).tolist()
             boxes, scores, all_labels = boxes[keep], scores[keep], [all_labels[i] for i in keep]

@@ -6,6 +6,7 @@ Writes to report/tables/:
   main_results.md / .csv   model x dataset, all 12 COCOeval stats, plus device and mean predict time
   per_class_kitti.md       AP and AP50 for car / person / truck per model, COCO vs. KITTI, with the drop
   published_check.md       our COCO AP vs. the published value for each checkpoint
+  speed.md                 latency per stage, FPS, stability and memory from results/benchmark/*/benchmark.json
 All AP/AR values are in percent (COCOeval numbers x 100), rounded to 1 decimal.
 """
 from __future__ import annotations
@@ -100,12 +101,71 @@ def published_check() -> None:
     (OUT / "published_check.md").write_text(f"# COCO val2017: ours vs. published\n\n{md_table(header, rows)}\n")
 
 
+def rel_diff(v: list[float]) -> float:
+    """(max - min) / min across repeats."""
+    return (max(v) - min(v)) / min(v)
+
+
+def speed() -> None:
+    header = ["model", "dataset", "preprocess", "forward", "postprocess", "total mean", "total median",
+              "total p90", "FPS", "run diff (mean)", "run diff (median)", "peak MPS alloc (MB)", "peak driver (MB)"]
+    rows, notes = [], []
+    for m in MODELS:
+        for d in DATASETS:
+            f = RESULTS / "benchmark" / f"{m}_{d}" / "benchmark.json"
+            if not f.exists():
+                continue
+            b = json.loads(f.read_text())
+            r = b["runs"][-1]  # last repeat; stability column compares all repeats
+            mem = b["memory_mb"]["peak_during_timed"]
+            rows.append([MODELS[m], DATASETS[d], *[f"{r[s]['mean']:.1f}" for s in ("preprocess", "forward", "postprocess")],
+                         f"{r['total']['mean']:.1f}", f"{r['total']['median']:.1f}", f"{r['total']['p90']:.1f}",
+                         f"{r['fps']:.1f}", f"{100 * b['stability_rel_diff_mean_total']:.1f}%",
+                         f"{100 * rel_diff([x['total']['median'] for x in b['runs']]):.1f}%",
+                         f"{mem.get('current_allocated_mb', 0):.0f}", f"{mem.get('driver_allocated_mb', 0):.0f}"])
+            if "gdino_text_encoder" in b:
+                te = b["gdino_text_encoder"]
+                notes.append(f"- Grounding DINO on {DATASETS[d]}: text encoder (BERT, 4 prompt chunks) alone takes "
+                             f"{te['ms_per_image_all_chunks']['mean']:.1f} ms/img, about "
+                             f"{100 * te['share_of_forward']:.1f}% of the forward time.")
+    p = b["protocol"] if rows else {}
+    text = (f"# Speed and memory (batch 1, device {b['device'] if rows else '-'})\n\n"
+            "Latency in ms per image (stage means; total = sum of stages per image).\n\n"
+            f"{md_table(header, rows)}\n\n"
+            f"Protocol: {p.get('warmup')} warm-up + {p.get('n_timed')} timed images (same list for every model), "
+            f"{p.get('repeats')} repeats; table shows the last repeat. run diff = (max-min)/min across repeats of the "
+            "mean or median total; the median is the stability criterion (<10%), because the mean of the first "
+            "repeat includes one-off MPS kernel compilation for input shapes not seen during warm-up (see below). Image decoding is not timed. Device synchronized before every timestamp. Evaluation "
+            "thresholds (score 0.001, 100 dets). NMS: Faster R-CNN final NMS in postprocess (proposal NMS inside "
+            "forward); YOLO11s NMS in postprocess; Grounding DINO forward = 4 prompt-chunk passes, postprocess "
+            "includes the cross-chunk NMS.\n\nMemory: peak of torch.mps.current_allocated_memory() (tensors) and "
+            "driver_allocated_memory() (all Metal allocations) after each image. Apple Silicon unified memory is "
+            "shared with the CPU, so this is not equivalent to CUDA VRAM.\n\n" + "\n".join(notes) + "\n" + shape_note())
+    (OUT / "speed.md").write_text(text)
+
+
+def shape_note() -> str:
+    """Append the first-seen-input-shape measurement (scripts/mps_shape_effect.py), if available."""
+    f = RESULTS / "benchmark" / "shape_effect.json"
+    if not f.exists():
+        return ""
+    lines = ["\n## First-seen input shapes on MPS\n",
+             "COCO images vary in size, so the network input shape varies; MPS compiles kernels the first time it "
+             "sees a shape. KITTI frames all have one size. Measured after the same 20 warm-up images:\n",
+             md_table(["model", "dataset", "distinct shapes", "imgs with new shape", "ms (new shape)", "ms (seen shape)"],
+                      [[MODELS[r["model"]], DATASETS[r["dataset"]], str(r["distinct_shapes"]), str(r["n_new"]),
+                        f"{r['ms_new']:.1f}" if r["n_new"] else "-", f"{r['ms_seen']:.1f}"]
+                       for r in json.loads(f.read_text())])]
+    return "\n".join(lines) + "\n"
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     main_results()
     per_class_kitti()
     published_check()
-    for f in ("main_results.md", "per_class_kitti.md", "published_check.md"):
+    speed()
+    for f in ("main_results.md", "per_class_kitti.md", "published_check.md", "speed.md"):
         print((OUT / f).read_text())
 
 

@@ -1,0 +1,108 @@
+{
+  "model": "yolo11s",
+  "dataset": "coco",
+  "device": "mps",
+  "device_fallback": null,
+  "protocol": {
+    "batch_size": 1,
+    "warmup": 20,
+    "n_timed": 200,
+    "repeats": 2,
+    "image_ids_file": "results/benchmark/coco_images.txt",
+    "decode_timed": false,
+    "settings": "eval thresholds from configs/models.yaml"
+  },
+  "detector": {
+    "model": "yolo11s",
+    "device": "mps",
+    "checkpoint": "/Users/arashheidari/Desktop/Workspace/CMPE-249-Intelligent-autonomous-systems/weights/yolo11s.pt",
+    "imgsz": 640,
+    "conf": 0.001,
+    "iou": 0.7,
+    "max_det": 100,
+    "stats": {}
+  },
+  "versions": {
+    "python": "3.11.18",
+    "torch": "2.15.0",
+    "torchvision": "0.29.2",
+    "ultralytics": "8.4.214",
+    "transformers": "5.23.0",
+    "pycocotools": "2.0.11",
+    "numpy": "2.4.6",
+    "pillow": "13.0.0"
+  },
+  "staged_check": {
+    "count_diff": 0,
+    "max_box_diff_px": 0.0,
+    "max_score_diff": 0.0
+  },
+  "runs": [
+    {
+      "preprocess": {
+        "mean": 1.4039735606638715,
+        "median": 1.3048749533481896,
+        "p90": 1.6705836635082958,
+        "std": 0.4792539922985858
+      },
+      "forward": {
+        "mean": 14.28146899328567,
+        "median": 10.374832956586033,
+        "p90": 12.514583219308406,
+        "std": 18.63108597233254
+      },
+      "postprocess": {
+        "mean": 1.7396030900999904,
+        "median": 1.6057915054261684,
+        "p90": 2.039900259114802,
+        "std": 0.41787183686260404
+      },
+      "total": {
+        "mean": 17.425045644049533,
+        "median": 13.251146068796515,
+        "p90": 15.957591962069273,
+        "std": 19.120621837806024
+      },
+      "fps": 57.38865885504807
+    },
+    {
+      "preprocess": {
+        "mean": 1.3499070500256494,
+        "median": 1.309624989517033,
+        "p90": 1.5745335374958813,
+        "std": 0.20841653998834997
+      },
+      "forward": {
+        "mean": 10.25049352669157,
+        "median": 10.316458472516388,
+        "p90": 11.141454195603728,
+        "std": 1.3392151863672472
+      },
+      "postprocess": {
+        "mean": 1.5807714825496078,
+        "median": 1.5664994716644287,
+        "p90": 1.6580336028710008,
+        "std": 0.08233369991115515
+      },
+      "total": {
+        "mean": 13.181172059266828,
+        "median": 13.174062012694776,
+        "p90": 14.577512198593467,
+        "std": 1.4462016020100592
+      },
+      "fps": 75.865787617647
+    }
+  ],
+  "stability_rel_diff_mean_total": 0.3219648120592669,
+  "memory_mb": {
+    "after_load": {
+      "current_allocated_mb": 36.09912109375,
+      "driver_allocated_mb": 69.703125
+    },
+    "peak_during_timed": {
+      "current_allocated_mb": 36.125244140625,
+      "driver_allocated_mb": 183.1875
+    },
+    "note": "MPS unified memory: shared with the CPU, not equivalent to CUDA VRAM"
+  }
+}

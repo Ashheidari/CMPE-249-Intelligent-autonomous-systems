@@ -19,6 +19,8 @@ run() {  # run <model> <dataset>
 
 if [[ $# -eq 2 ]]; then
   run "$1" "$2"
+elif [[ $# -ne 0 ]]; then
+  echo "usage: $0 [model dataset]" >&2; exit 2
 else
   for m in faster_rcnn yolo11s gdino; do for d in coco kitti; do run $m $d; done; done
   $L $PY -m src.analysis.tables

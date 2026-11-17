@@ -34,6 +34,20 @@ class Detector(ABC):
         open-vocabulary models use it as the text prompt.
         """
 
+    # Staged interface, used by the speed benchmark (src/eval/benchmark.py) to time each part.
+    # postprocess(forward(preprocess(img, names)), ...) returns the same dict as predict().
+    def preprocess(self, image: Image.Image, class_names: list[str]) -> dict:
+        """PIL RGB image -> model inputs on self.device (resize, normalize, tokenize, ...)."""
+        raise NotImplementedError
+
+    def forward(self, inputs: dict) -> Any:
+        """Run the network on the outputs of preprocess()."""
+        raise NotImplementedError
+
+    def postprocess(self, outputs: Any, inputs: dict) -> dict:
+        """Raw network outputs -> the predict() result dict (decode, NMS, rescale, top-k)."""
+        raise NotImplementedError
+
     def describe(self) -> dict[str, Any]:
         """Settings to record in config.json."""
         return {"model": self.name, "device": self.device, **self.cfg, "stats": self.stats}
