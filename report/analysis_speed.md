@@ -119,6 +119,6 @@ prompt (195 tokens) instead of four 20-class prompts.
 
 - One prompt is **3.8× faster and 1.3 AP better** on these 200 images. This supports H2: the chunking, not
   the text encoder, caused most of Grounding DINO's latency.
-- The M4/M5 numbers use 4 chunks, so they understate Grounding DINO. A full-set run with
-  `--set chunk_size=80` would give the fair number (about 1 h on COCO). TODO(user): decide whether to
-  re-run M4/M5 for Grounding DINO with one prompt, or to report the 4-chunk setting and this ablation.
+- Decision: the main results (M4/M5) keep the 4-chunk setting, and this run is reported as an
+  ablation. The main tables therefore understate Grounding DINO's speed (and, on this sample, its AP).
+  Say so wherever its latency is compared.

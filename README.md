@@ -136,3 +136,13 @@ plus "person" and "walking person" wordings of the pedestrian class.
 The script ends by running `python -m src.analysis.open_vocab`, which writes `report/tables/open_vocab.md`
 and `report/tables/followup_experiments.md`. Write-ups: `report/analysis_open_vocab.md`, and the follow-up
 section of `report/analysis_speed.md`.
+
+### 9. Failure analysis
+```bash
+.venv/bin/python -m src.analysis.failures   # ~5 min (re-runs the models on frames with cyclists)
+```
+This classifies every KITTI detection at score ≥ 0.3 as TP, duplicate, inside an ignore region, or FP
+(wrong class / localization / background), and finds missed GT boxes. It also re-runs all 80 classes on
+frames containing cyclists, to count person + bicycle boxes on KITTI Cyclist boxes. It then renders
+13 gallery images, 3 of them side-by-side comparisons of all models. Outputs: `report/figures/failures/`,
+`report/tables/failure_counts.md`, `report/failure_cases.md` and `results/analysis/failures.json`.

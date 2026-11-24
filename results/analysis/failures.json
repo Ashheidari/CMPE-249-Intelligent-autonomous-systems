@@ -1,0 +1,246 @@
+{
+  "counts": {
+    "faster_rcnn": {
+      "FP": 5538,
+      "FP: background": 3501,
+      "FP score > 0.5": 3487,
+      "TP": 5861,
+      "ignored": 6189,
+      "on DontCare region": 4598,
+      "GT total": 6822,
+      "on Cyclist region": 432,
+      "FP: localization": 1897,
+      "on Van region": 960,
+      "on Van region as truck": 363,
+      "on Misc region": 162,
+      "missed GT": 961,
+      "missed: small (<32\u00b2 px)": 135,
+      "missed: occluded (level 1-2)": 768,
+      "on Van region as car": 537,
+      "on Van region as person": 60,
+      "FP: wrong class": 140,
+      "duplicate": 95,
+      "on Tram region": 37
+    },
+    "yolo11s": {
+      "TP": 5107,
+      "ignored": 1544,
+      "on DontCare region": 844,
+      "GT total": 6822,
+      "missed GT": 1715,
+      "missed: small (<32\u00b2 px)": 484,
+      "missed: occluded (level 1-2)": 1266,
+      "on Cyclist region": 172,
+      "on Van region": 462,
+      "on Van region as truck": 158,
+      "FP": 1008,
+      "FP: localization": 630,
+      "FP score > 0.5": 366,
+      "FP: background": 335,
+      "on Van region as car": 304,
+      "FP: wrong class": 43,
+      "on Misc region": 63,
+      "duplicate": 149,
+      "on Tram region": 3
+    },
+    "gdino": {
+      "ignored": 4026,
+      "on DontCare region": 2989,
+      "TP": 5695,
+      "FP": 3264,
+      "FP: background": 2016,
+      "FP score > 0.5": 564,
+      "GT total": 6822,
+      "on Cyclist region": 320,
+      "FP: localization": 1140,
+      "on Van region": 570,
+      "on Van region as truck": 360,
+      "on Misc region": 126,
+      "missed GT": 1127,
+      "missed: small (<32\u00b2 px)": 162,
+      "missed: occluded (level 1-2)": 872,
+      "on Van region as person": 38,
+      "on Van region as car": 172,
+      "FP: wrong class": 108,
+      "duplicate": 18,
+      "on Tram region": 21
+    }
+  },
+  "cyclist_check": {
+    "faster_rcnn": {
+      "cyclists with a bicycle box": 159,
+      "cyclists with a person box": 265,
+      "cyclists with person + bicycle": 146,
+      "cyclist boxes": 306
+    },
+    "yolo11s": {
+      "cyclists with a bicycle box": 82,
+      "cyclists with a person box": 163,
+      "cyclists with person + bicycle": 67,
+      "cyclist boxes": 306
+    },
+    "gdino": {
+      "cyclists with a bicycle box": 231,
+      "cyclists with a person box": 248,
+      "cyclists with person + bicycle": 208,
+      "cyclist boxes": 306
+    }
+  },
+  "gallery": [
+    {
+      "type": "high-confidence FP (background)",
+      "model": "faster_rcnn",
+      "image_id": 1755,
+      "what": "Faster R-CNN R50-FPN v2 predicts person at 0.99; the other models have no such box",
+      "hyp": "Unlabelled object or clutter; possibly a real object without a KITTI label.",
+      "file": "01_high-confidence_FP_faster_rcnn_001755.png"
+    },
+    {
+      "type": "high-confidence FP (background)",
+      "model": "yolo11s",
+      "image_id": 4610,
+      "what": "YOLO11s predicts car at 0.71; the other models have no such box",
+      "hyp": "Unlabelled object or clutter; possibly a real object without a KITTI label.",
+      "file": "02_high-confidence_FP_yolo11s_004610.png"
+    },
+    {
+      "type": "high-confidence FP (background)",
+      "model": "gdino",
+      "image_id": 5104,
+      "what": "Grounding DINO tiny predicts person at 0.72; the other models have no such box",
+      "hyp": "Unlabelled object or clutter; possibly a real object without a KITTI label.",
+      "file": "03_high-confidence_FP_gdino_005104.png"
+    },
+    {
+      "type": "missed object",
+      "model": "faster_rcnn",
+      "image_id": 5306,
+      "what": "Faster R-CNN R50-FPN v2 misses a car (28 px tall, largely occluded, truncation 0.00) that the other two find",
+      "hyp": "Hard instance (28 px tall, largely occluded, truncation 0.00); the other models found it, so the cue is visible. If occluded, the GT box may span the hidden part too, so a visible-part box falls below IoU 0.5.",
+      "file": "04_missed_object_faster_rcnn_005306.png"
+    },
+    {
+      "type": "missed object",
+      "model": "yolo11s",
+      "image_id": 6139,
+      "what": "YOLO11s misses a person (57 px tall, partly occluded, truncation 0.00) that the other two find",
+      "hyp": "Hard instance (57 px tall, partly occluded, truncation 0.00); the other models found it, so the cue is visible. If occluded, the GT box may span the hidden part too, so a visible-part box falls below IoU 0.5.",
+      "file": "05_missed_object_yolo11s_006139.png"
+    },
+    {
+      "type": "missed object",
+      "model": "gdino",
+      "image_id": 2418,
+      "what": "Grounding DINO tiny misses a car (29 px tall, partly occluded, truncation 0.00) that the other two find",
+      "hyp": "Hard instance (29 px tall, partly occluded, truncation 0.00); the other models found it, so the cue is visible. If occluded, the GT box may span the hidden part too, so a visible-part box falls below IoU 0.5.",
+      "file": "06_missed_object_gdino_002418.png"
+    },
+    {
+      "type": "duplicate detections",
+      "model": "yolo11s",
+      "image_id": 6689,
+      "what": "YOLO11s: 2 duplicate boxes (score >= 0.3) on already-matched objects",
+      "hyp": "Two boxes on one object survive NMS (NMS IoU 0.7 is permissive).",
+      "file": "07_duplicate_detections_yolo11s_006689.png"
+    },
+    {
+      "type": "duplicate detections",
+      "model": "yolo11s",
+      "image_id": 6431,
+      "what": "YOLO11s: 2 duplicate boxes (score >= 0.3) on already-matched objects",
+      "hyp": "Two boxes on one object survive NMS (NMS IoU 0.7 is permissive).",
+      "file": "08_duplicate_detections_yolo11s_006431.png"
+    },
+    {
+      "type": "mapping: detection on a Van",
+      "model": "faster_rcnn",
+      "image_id": 1045,
+      "what": "Faster R-CNN R50-FPN v2 calls a KITTI Van 'truck' (1.00); neutral because Van is an ignore region",
+      "hyp": "COCO has no van class, so the model calls a van 'truck'. Neutral under Van: ignore, an FP under Van: car.",
+      "file": "09_mapping_detection_on_a_Van_faster_rcnn_001045.png"
+    },
+    {
+      "type": "mapping: cyclist",
+      "model": "faster_rcnn",
+      "image_id": 6894,
+      "what": "Faster R-CNN R50-FPN v2 reports a 'person' and a 'bicycle' where KITTI has one Cyclist box (orange dashed: 80-class output on that cyclist)",
+      "hyp": "COCO splits a cyclist into a person and a bicycle; KITTI labels one Cyclist box, so neither matches.",
+      "file": "10_mapping_cyclist_faster_rcnn_006894.png"
+    },
+    {
+      "type": "side by side",
+      "model": "all",
+      "image_id": 112,
+      "file": "11_side_by_side_000112.png",
+      "stats": {
+        "faster_rcnn": {
+          "TP": 5,
+          "FP": 15,
+          "missed": 5
+        },
+        "yolo11s": {
+          "TP": 4,
+          "FP": 6,
+          "missed": 6
+        },
+        "gdino": {
+          "TP": 3,
+          "FP": 10,
+          "missed": 7
+        }
+      },
+      "what": "Faster R-CNN R50-FPN v2 TP 5 / FP 15 / missed 5; YOLO11s TP 4 / FP 6 / missed 6; Grounding DINO tiny TP 3 / FP 10 / missed 7",
+      "hyp": "TODO(user): what the models disagree on in this frame."
+    },
+    {
+      "type": "side by side",
+      "model": "all",
+      "image_id": 4740,
+      "file": "12_side_by_side_004740.png",
+      "stats": {
+        "faster_rcnn": {
+          "TP": 5,
+          "FP": 13,
+          "missed": 7
+        },
+        "yolo11s": {
+          "TP": 7,
+          "FP": 3,
+          "missed": 5
+        },
+        "gdino": {
+          "TP": 7,
+          "FP": 12,
+          "missed": 5
+        }
+      },
+      "what": "Faster R-CNN R50-FPN v2 TP 5 / FP 13 / missed 7; YOLO11s TP 7 / FP 3 / missed 5; Grounding DINO tiny TP 7 / FP 12 / missed 5",
+      "hyp": "TODO(user): what the models disagree on in this frame."
+    },
+    {
+      "type": "side by side",
+      "model": "all",
+      "image_id": 6475,
+      "file": "13_side_by_side_006475.png",
+      "stats": {
+        "faster_rcnn": {
+          "TP": 6,
+          "FP": 19,
+          "missed": 5
+        },
+        "yolo11s": {
+          "TP": 4,
+          "FP": 1,
+          "missed": 7
+        },
+        "gdino": {
+          "TP": 7,
+          "FP": 11,
+          "missed": 4
+        }
+      },
+      "what": "Faster R-CNN R50-FPN v2 TP 6 / FP 19 / missed 5; YOLO11s TP 4 / FP 1 / missed 7; Grounding DINO tiny TP 7 / FP 11 / missed 4",
+      "hyp": "TODO(user): what the models disagree on in this frame."
+    }
+  ]
+}
