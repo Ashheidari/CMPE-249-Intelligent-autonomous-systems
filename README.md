@@ -76,9 +76,10 @@ unzip -q data_object_image_2.zip -d data/kitti     # -> data/kitti/training/imag
 unzip -q data_object_label_2.zip -d data/kitti     # -> data/kitti/training/label_2/
 ```
 
-**Option B: Kaggle re-pack (used for the reported results).** On Kaggle, search for the dataset
-`kitti-object-detection-2d`, which contains `train/`, `val/` and `test/` folders, each with `images/`
-and `labels/`. Copy `train/` and `val/` into `data/kitti/`. The train/val split is Kaggle's own and is
+**Option B: Kaggle re-pack (used for the reported results).** Download
+<https://www.kaggle.com/datasets/hannanguyen24/kitti-object-detection-2d> (a Kaggle account is needed).
+Inside the archive, the `Downloads/` folder contains `train/`, `val/` and `test/`; `train/` and `val/` each have
+`images/` and `labels/`. Copy `train/` and `val/` into `data/kitti/`. The train/val split is Kaggle's own and is
 ignored: together the two halves are the full 7,481-frame training split, and `test/` (no labels) is
 not used. Check that a label file has 15 space-separated fields per line, e.g.
 `Car 0.00 0 1.55 614.24 181.78 727.31 284.77 1.57 1.73 4.15 1.00 1.75 13.22 1.62`.
