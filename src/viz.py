@@ -37,7 +37,7 @@ def draw_detections(image: Image.Image, det: dict, thresh: float = 0.3, title: s
     return img
 
 
-def _dashed_rect(d: ImageDraw.ImageDraw, box: list[float], color, width: int = 2, dash: int = 6) -> None:
+def dashed_rect(d: ImageDraw.ImageDraw, box: list[float], color, width: int = 2, dash: int = 6) -> None:
     """Draw a dashed rectangle (PIL has no dashed lines)."""
     x0, y0, x1, y1 = box
     for (ax, ay, bx, by) in [(x0, y0, x1, y0), (x1, y0, x1, y1), (x1, y1, x0, y1), (x0, y1, x0, y0)]:
@@ -63,7 +63,7 @@ def draw_gt(image: Image.Image, anns: list[dict], cat_names: dict[int, str], tit
             if tuple(box) in seen:
                 continue
             seen.add(tuple(box))
-            _dashed_rect(d, box, (200, 200, 200))
+            dashed_rect(d, box, (200, 200, 200))
             d.text((x + 2, y + 1), a.get("kitti_type", "ignore"), fill=(230, 230, 230), font=font)
         else:
             c = class_color(cat_names[a["category_id"]])

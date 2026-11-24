@@ -109,13 +109,14 @@ def rel_diff(v: list[float]) -> float:
 def speed() -> None:
     header = ["model", "dataset", "preprocess", "forward", "postprocess", "total mean", "total median",
               "total p90", "FPS", "run diff (mean)", "run diff (median)", "peak MPS alloc (MB)", "peak driver (MB)"]
-    rows, notes = [], []
+    rows, notes, device, p = [], [], "-", {}
     for m in MODELS:
         for d in DATASETS:
             f = RESULTS / "benchmark" / f"{m}_{d}" / "benchmark.json"
             if not f.exists():
                 continue
             b = json.loads(f.read_text())
+            device, p = b["device"], b["protocol"]
             r = b["runs"][-1]  # last repeat; stability column compares all repeats
             mem = b["memory_mb"]["peak_during_timed"]
             rows.append([MODELS[m], DATASETS[d], *[f"{r[s]['mean']:.1f}" for s in ("preprocess", "forward", "postprocess")],
@@ -128,8 +129,7 @@ def speed() -> None:
                 notes.append(f"- Grounding DINO on {DATASETS[d]}: text encoder (BERT, 4 prompt chunks) alone takes "
                              f"{te['ms_per_image_all_chunks']['mean']:.1f} ms/img, about "
                              f"{100 * te['share_of_forward']:.1f}% of the forward time.")
-    p = b["protocol"] if rows else {}
-    text = (f"# Speed and memory (batch 1, device {b['device'] if rows else '-'})\n\n"
+    text = (f"# Speed and memory (batch 1, device {device})\n\n"
             "Latency in ms per image (stage means; total = sum of stages per image).\n\n"
             f"{md_table(header, rows)}\n\n"
             f"Protocol: {p.get('warmup')} warm-up + {p.get('n_timed')} timed images (same list for every model), "

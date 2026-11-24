@@ -29,7 +29,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 import torch
 from PIL import Image
 from torchvision.ops import batched_nms
@@ -153,10 +152,10 @@ class GroundingDINO(Detector):
         assign = self._assign_tokens if self.cfg["label_assignment"] == "tokens" else self._assign_phrase
         all_boxes, all_scores, all_labels = [], [], []
         for out, chunk in zip(outputs, inputs["chunks"]):
-            b, s, l = assign(out, chunk, W, H)
+            b, s, lab = assign(out, chunk, W, H)
             all_boxes.append(b.float())
             all_scores.append(s.float())
-            all_labels += l
+            all_labels += lab
         boxes, scores = torch.cat(all_boxes), torch.cat(all_scores)
         if len(inputs["chunks"]) > 1 and self.cfg.get("chunk_nms_iou") and len(scores):
             idx = torch.tensor([class_names.index(n) for n in all_labels], device=boxes.device)

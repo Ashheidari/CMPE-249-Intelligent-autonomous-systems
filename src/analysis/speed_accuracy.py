@@ -32,8 +32,7 @@ def input_shape(model: str, inputs: dict) -> tuple[int, int]:
 
 
 def n_params(det) -> int:
-    return sum(p.numel() for p in det.model.parameters()) if hasattr(det.model, "parameters") \
-        else sum(p.numel() for p in det.model.model.parameters())
+    return sum(p.numel() for p in det.model.parameters())
 
 
 def measure_inputs() -> dict:

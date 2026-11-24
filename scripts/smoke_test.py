@@ -42,11 +42,11 @@ def gt_match_rate(det: dict, coco: COCO, img_id: int, min_score: float = 0.5) ->
     gt_lbl = [names[a["category_id"]] for a in anns]
     keep = det["scores"] >= min_score
     boxes = torch.from_numpy(det["boxes"][keep])
-    labels = [l for l, k in zip(det["labels"], keep) if k]
+    labels = [lab for lab, k in zip(det["labels"], keep) if k]
     if len(boxes) == 0 or len(gt) == 0:
         return 0, len(boxes)
     iou = box_iou(boxes, gt)  # [N, G]
-    same = torch.tensor([[l == g for g in gt_lbl] for l in labels])
+    same = torch.tensor([[lab == g for g in gt_lbl] for lab in labels])
     return int(((iou >= 0.5) & same).any(1).sum()), len(boxes)
 
 

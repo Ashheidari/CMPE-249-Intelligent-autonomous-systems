@@ -31,7 +31,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from ..datasets.coco import DATASETS, ROOT, coco80_names, load_gt
 from ..models import build_detector
-from ..viz import _dashed_rect
+from ..viz import dashed_rect
 from .generalization import iou_xywh
 from .tables import MODELS, md_table
 
@@ -146,11 +146,11 @@ def cyclist_check(gt) -> dict:
             keep = r["scores"] >= DISPLAY
             xy = r["boxes"][keep]
             xywh = np.c_[xy[:, :2], xy[:, 2:] - xy[:, :2]]
-            labels = [l for l, k in zip(r["labels"], keep) if k]
+            labels = [lab for lab, k in zip(r["labels"], keep) if k]
             live[m][img_id] = {"boxes": xywh.tolist(), "scores": r["scores"][keep].tolist(), "labels": labels}
             cb = np.array(boxes, dtype=float)
-            bike = np.array([l == "bicycle" for l in labels], dtype=bool)
-            pers = np.array([l == "person" for l in labels], dtype=bool)
+            bike = np.array([lab == "bicycle" for lab in labels], dtype=bool)
+            pers = np.array([lab == "person" for lab in labels], dtype=bool)
             # bicycle: >= 70% of the bicycle box inside the cyclist box; person: IoU >= 0.3 with it
             b_hit = (ioa(xywh[bike], cb) >= 0.7).any(0) if bike.any() else np.zeros(len(cb), bool)
             p_hit = (iou_xywh(xywh[pers], cb) >= 0.3).any(0) if pers.any() else np.zeros(len(cb), bool)
@@ -176,22 +176,23 @@ def render(img: Image.Image, anns: list[dict], dets: list[dict], focus: dict | N
         if a["iscrowd"]:
             if tuple(a["bbox"]) not in seen:
                 seen.add(tuple(a["bbox"]))
-                _dashed_rect(d, xyxy(a["bbox"]), GRAY, width=1)
+                dashed_rect(d, xyxy(a["bbox"]), GRAY, width=1)
                 d.text((a["bbox"][0] + 2, a["bbox"][1] + 1), a["kitti_type"], fill=GRAY, font=font)
         else:
-            d.rectangle(xyxy(a["bbox"]), outline=GREEN, width=4 if focus is a or (focus and focus.get("bbox") == a["bbox"] and "kind" not in focus) else 2)
+            is_focus = focus is not None and "kind" not in focus and focus["bbox"] == a["bbox"]  # a focused GT box
+            d.rectangle(xyxy(a["bbox"]), outline=GREEN, width=4 if is_focus else 2)
     for x in dets:
         b, color = xyxy(x["bbox"]), {"TP": BLUE, "ignored": LIGHT_BLUE}.get(x["kind"], RED)
         w = 5 if focus is x else 2
         if x["kind"] == "ignored":
-            _dashed_rect(d, b, color, width=w)
+            dashed_rect(d, b, color, width=w)
         else:
             d.rectangle(b, outline=color, width=w)
         if x["kind"] != "TP" or focus is x:
             tag = {"duplicate": " dup"}.get(x["kind"], "")
             d.text((b[0] + 2, max(0, b[1] - 15)), f"{CLASSES[x['category_id']]} {x['score']:.2f}{tag}", fill=color, font=font)
     for box, label in extra:
-        _dashed_rect(d, xyxy(box), (255, 170, 0), width=3)
+        dashed_rect(d, xyxy(box), (255, 170, 0), width=3)
         d.text((box[0] + 2, box[1] + box[3] + 1), label, fill=(255, 170, 0), font=font)
     if focus is not None:  # zoomed crop of the case, to the right of the frame
         x, y, w, h = focus["bbox"]
@@ -307,8 +308,8 @@ def pick(per: dict, cyc: dict, gt) -> list[dict]:
             if i in used:
                 continue
             lv = cyc["live"][m][i]
-            n_bike = sum(l == "bicycle" for l in lv["labels"])
-            n_pers = sum(l == "person" for l in lv["labels"])
+            n_bike = sum(lab == "bicycle" for lab in lv["labels"])
+            n_pers = sum(lab == "person" for lab in lv["labels"])
             if n_bike and n_pers and (best is None or n_bike + n_pers > best[0]):
                 best = (n_bike + n_pers, m, i)
     if best:
@@ -318,7 +319,7 @@ def pick(per: dict, cyc: dict, gt) -> list[dict]:
         cbs = [a for a in gt.loadAnns(gt.getAnnIds(imgIds=i, iscrowd=True))
                if a["kitti_type"] == "Cyclist" and a["category_id"] == first]
         lv = cyc["live"][m][i]
-        pb = np.array([b for b, l in zip(lv["boxes"], lv["labels"]) if l in ("bicycle", "person")], float)
+        pb = np.array([b for b, lab in zip(lv["boxes"], lv["labels"]) if lab in ("bicycle", "person")], float)
         focus = max(cbs, key=lambda a: int((ioa(pb, np.array([a["bbox"]], float))[:, 0] >= 0.7).sum()))
         take({"type": "mapping: cyclist", "model": m, "image_id": i, "focus": focus, "live": True,
               "what": f"{MODELS[m]} reports a 'person' and a 'bicycle' where KITTI has one Cyclist box "
@@ -355,8 +356,8 @@ def main() -> None:
         if p.get("live"):
             lv = cyc["live"][m][i]
             fb = np.array([p["focus"]["bbox"]], float)
-            extra = [(b, f"{l} {s:.2f}") for b, l, s in zip(lv["boxes"], lv["labels"], lv["scores"])
-                     if l in ("bicycle", "person") and ioa(np.array([b], float), fb)[0, 0] >= 0.7]
+            extra = [(b, f"{lab} {s:.2f}") for b, lab, s in zip(lv["boxes"], lv["labels"], lv["scores"])
+                     if lab in ("bicycle", "person") and ioa(np.array([b], float), fb)[0, 0] >= 0.7]
         name = f"{n:02d}_{p['type'].split(' (')[0].replace(':', '').replace(' ', '_')}_{m}_{i:06d}.png"
         render(img, anns, per[m][i][0], p["focus"], f"{MODELS[m]} | frame {i:06d} | {p['type']}", extra).save(FIG / name)
         entries.append({**{k: v for k, v in p.items() if k not in ("focus", "live")}, "file": name})

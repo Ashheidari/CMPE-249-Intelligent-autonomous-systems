@@ -35,7 +35,6 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from pathlib import Path
 
 import numpy as np
 import torch
@@ -87,7 +86,7 @@ def time_one(det, img: Image.Image, names: list[str]) -> dict[str, float]:
 
 def check_staged(det, images: list[Image.Image], names: list[str]) -> dict:
     """Compare predict() with the staged path. Returns the worst differences seen."""
-    worst = {"count_diff": 0, "max_box_diff_px": 0.0, "max_score_diff": 0.0}
+    worst = {"count_diff": 0, "max_box_diff_px": 0.0, "max_score_diff": 0.0, "labels_equal": True}
     for img in images:
         a = det.predict(img, names)
         with torch.no_grad():
@@ -98,7 +97,7 @@ def check_staged(det, images: list[Image.Image], names: list[str]) -> dict:
         if n:
             worst["max_box_diff_px"] = max(worst["max_box_diff_px"], float(np.abs(a["boxes"][:n] - b["boxes"][:n]).max()))
             worst["max_score_diff"] = max(worst["max_score_diff"], float(np.abs(a["scores"][:n] - b["scores"][:n]).max()))
-            assert a["labels"][:n] == b["labels"][:n] or worst["max_score_diff"] < 1e-4, "label order differs"
+            worst["labels_equal"] &= a["labels"][:n] == b["labels"][:n]
     return worst
 
 
@@ -151,7 +150,7 @@ def main() -> None:
     check = check_staged(det, images[:args.check], names) if args.check else None
     if check:
         print(f"staged vs predict(): {check}")
-        if check["count_diff"] or check["max_box_diff_px"] > 0.5:
+        if check["count_diff"] or check["max_box_diff_px"] > 0.5 or not check["labels_equal"]:
             raise SystemExit("staged path disagrees with predict(); fix before benchmarking")
 
     for img in tqdm(warm, desc="warmup"):
@@ -197,8 +196,8 @@ def main() -> None:
     out = OUT / (f"{args.model}_{args.dataset}" + "".join(f"_{k}{v}" for k, v in overrides.items()))
     out.mkdir(parents=True, exist_ok=True)
     (out / "benchmark.json").write_text(json.dumps(result, indent=2))
-    print(f"stability (max-min)/min of mean total over {args.repeats} runs: "
-          f"{100 * stability:.1f}%" if stability is not None else "")
+    if stability is not None:
+        print(f"stability (max-min)/min of mean total over {args.repeats} runs: {100 * stability:.1f}%")
     print(f"peak memory: {peak} | wrote {out / 'benchmark.json'}")
 
 

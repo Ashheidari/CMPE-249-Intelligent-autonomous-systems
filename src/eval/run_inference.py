@@ -160,7 +160,7 @@ def main() -> None:
             det = det_model.predict(img, prompt)
             synchronize(det_model.device)
             ms = (time.perf_counter() - t0) * 1000
-            det["labels"] = [back.get(l, l) for l in det["labels"]]
+            det["labels"] = [back.get(lab, lab) for lab in det["labels"]]
             res, dropped = to_coco_results(det, img_id, name2id, set(class_names))
             f.write(json.dumps({"image_id": img_id, "ms": round(ms, 2), "dropped": dropped, "dets": res}) + "\n")
             f.flush()

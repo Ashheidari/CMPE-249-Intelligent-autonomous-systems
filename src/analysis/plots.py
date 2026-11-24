@@ -110,12 +110,12 @@ def recall_vs_occlusion() -> None:
         for m in MODELS:
             for thr, style in (("0.3", "-"), ("0.001", "--")):
                 r = res[m]["recall"][thr][cls]
-                ax.plot(xl, [100 * r[l]["recall"] for l in levels], style, color=COLOR[m], marker="o",
+                ax.plot(xl, [100 * r[lev]["recall"] for lev in levels], style, color=COLOR[m], marker="o",
                         markersize=6, markeredgecolor=SURFACE, markeredgewidth=1.5,
                         alpha=1 if thr == "0.3" else 0.55,
                         label=f"{MODELS[m]}, score ≥ {thr}")
         n = res[next(iter(MODELS))]["recall"]["0.3"][cls]
-        ax.set_xticks(range(3), [f"{x}\n(n={n[l]['n']})" for x, l in zip(xl, levels)])
+        ax.set_xticks(range(3), [f"{x}\n(n={n[lev]['n']})" for x, lev in zip(xl, levels)])
         ax.set_title(cls)
         ax.set_ylim(0, 102)
         ax.tick_params(axis="x", length=0)

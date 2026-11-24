@@ -26,7 +26,7 @@ from pycocotools.coco import COCO
 
 from ..datasets.coco import ROOT, load_gt, select_image_ids
 from ..eval.coco_eval import evaluate
-from .tables import DATASETS, MODELS, md_table
+from .tables import MODELS, md_table
 
 RESULTS = ROOT / "results"
 TABLES = ROOT / "report" / "tables"
@@ -207,8 +207,7 @@ def main() -> None:
             "recall": {str(t): summarize_recall(recall_by_attribute(kitti_gt, preds, t)) for t in SCORE_THRESHOLDS},
             "label_policy": label_policy(m, kitti_ids, variants_gt, kitti_metrics),
         }
-        for k in ("coco_shared3",):
-            res[m][k] = {x: res[m][k][x] for x in ("stats", "per_class")}
+        res[m]["coco_shared3"] = {x: res[m]["coco_shared3"][x] for x in ("stats", "per_class")}
     out = RESULTS / "analysis" / "generalization.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, indent=2))

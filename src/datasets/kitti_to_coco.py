@@ -110,7 +110,7 @@ def stats_markdown(coco: dict) -> str:
     # each ignore box is replicated per eval class; count it once (first category only)
     first = coco["categories"][0]["id"]
     ign = [a for a in coco["annotations"] if a["iscrowd"] and a["category_id"] == first]
-    lines = [f"# KITTI subset statistics\n",
+    lines = ["# KITTI subset statistics\n",
              f"- images: {len(coco['images'])}",
              f"- evaluated boxes: {len(real)}",
              f"- ignore regions (iscrowd=1, counted once each): {len(ign)}",
@@ -144,7 +144,7 @@ def main() -> None:
     args = ap.parse_args()
 
     index = kitti_index(args.kitti_root)
-    frames = select_subset([k for k, (i, l) in index.items() if i and l])
+    frames = select_subset([k for k, (i, lbl) in index.items() if i and lbl])
     coco = build_coco(frames, index, yaml.safe_load(args.mapping.read_text()), args.kitti_root)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(coco))
