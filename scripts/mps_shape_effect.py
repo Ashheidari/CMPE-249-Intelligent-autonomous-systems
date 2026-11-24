@@ -1,10 +1,4 @@
-"""M5 side finding: latency of images whose network input shape is new vs. already seen (MPS).
-
-After the benchmark's 20 warm-up images, times each of the 200 timed images (three stages, synced)
-and splits them by whether the model's input tensor shape was seen before.
-Writes results/benchmark/shape_effect.json (used by src/analysis/tables.py for speed.md).
-Usage: .venv/bin/python scripts/mps_shape_effect.py
-"""
+"""Latency of images with a new vs. an already-seen input shape on MPS -> results/benchmark/shape_effect.json."""
 from __future__ import annotations
 
 import json

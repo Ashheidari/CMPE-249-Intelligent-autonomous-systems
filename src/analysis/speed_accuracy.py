@@ -1,11 +1,4 @@
-"""M7 analysis 2: speed-accuracy tradeoff. Joins M4 accuracy with M5 latency/memory.
-
-Usage: .venv/bin/python -m src.analysis.speed_accuracy
-
-Also measures, on the same 200 timed benchmark images, the network input size each model actually
-uses (after its own resize/letterbox), and counts model parameters, so latency can be related to
-input pixels. Writes results/analysis/speed_accuracy.json and report/tables/speed_accuracy.md.
-"""
+"""Analysis 2: join AP with latency/memory, and measure each model's real input size and parameter count."""
 from __future__ import annotations
 
 import json

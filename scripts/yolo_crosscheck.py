@@ -1,21 +1,6 @@
-"""M3 sanity check: YOLO11s on COCO val2017 through our pipeline vs. Ultralytics' own validator.
+"""YOLO11s on COCO: our pipeline vs. Ultralytics' own validator (multi- and single-label NMS).
 
-Three numbers, so a gap can be attributed:
-  The validator is run twice: with its default multi-label NMS and forced to single-label NMS
-  (what model.predict does), since that is the main inference difference.
-  A. Ultralytics `val` metric (its own AP code, its own dataloader/letterbox/NMS)
-  B. our pycocotools evaluator on Ultralytics' predictions.json   (A vs B isolates the metric code)
-  C. our full pipeline: results/yolo11s_coco/metrics.json          (B vs C isolates inference)
-
-Ultralytics needs YOLO-format labels, so this builds data/coco_yolo/ once:
-  images/val2017 -> symlink to data/coco/val2017
-  labels/val2017/*.txt   converted from instances_val2017.json (crowd boxes skipped, 91->80 ids)
-  val2017.txt            list of all 5,000 images; the name makes Ultralytics treat it as COCO
-                         (category ids mapped back to COCO's 91-id space in predictions.json)
-Validator settings match our pipeline: imgsz 640, conf 0.001, NMS IoU 0.7, max_det 100, batch 1
-(batch 1 so each image gets its own minimal letterbox, like model.predict).
-
-Usage: .venv/bin/python scripts/yolo_crosscheck.py [--device mps]   (run after the full yolo11s_coco run)
+Builds YOLO-format labels in data/coco_yolo/ once. Output: results/yolo_crosscheck/crosscheck.md.
 """
 from __future__ import annotations
 
@@ -88,8 +73,7 @@ def main() -> None:
     keys = ("AP", "AP50", "AP75", "APs", "APm", "APl")
     rows: dict[str, dict] = {}
     n_preds: dict[str, int] = {}
-    # The validator's NMS uses multi_label=True (a box may be kept for several classes);
-    # model.predict, which our pipeline calls, uses multi_label=False. Run both to measure it.
+    # The validator uses multi-label NMS, model.predict (our pipeline) single-label: run both.
     for multi_label in (True, False):
         tag = "multi_label" if multi_label else "single_label"
         with nms_multi_label(multi_label):

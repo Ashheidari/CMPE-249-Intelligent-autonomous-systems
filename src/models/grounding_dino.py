@@ -1,29 +1,7 @@
-"""Grounding DINO tiny (open-vocabulary, query-based) from Hugging Face transformers.
+"""Grounding DINO tiny (Hugging Face): open-vocabulary detection from a text prompt.
 
-Prompt: lowercase class names joined by " . " and ending in " ." (e.g. "car . person . truck .").
-COCO's 80 names are split into chunks (cfg.chunk_size) with one forward pass per chunk; detections
-are concatenated and, if there was more than one chunk, class-wise NMS (cfg.chunk_nms_iou) is
-applied before keeping the top cfg.max_det. All 80 names are ~195 BERT tokens, under the
-256-token limit, so chunking is a design choice rather than a hard requirement here.
-
-The text encoder runs inside every forward pass, so text encoding is part of the timed path.
-
-Label assignment (cfg.label_assignment):
-  "tokens" (default): the model outputs, per query q, a probability p[q, t] = sigmoid(logit)
-      for every prompt token t. The score of class c for query q is the mean of p[q, t] over the
-      tokens of c's name (this is the positive-map scoring used in the official Grounding DINO
-      COCO evaluation). Every (query, class) pair with score > box_threshold is a candidate
-      detection, so one query can yield several class hypotheses, as in DETR-style COCO eval.
-      text_threshold is not used in this mode.
-  "phrase": the plan's original rule, using HF post_process_grounded_object_detection, which
-      keeps queries whose max token prob > box_threshold and decodes all tokens with
-      prob > text_threshold into a phrase. The phrase is mapped to a class by
-        1. exact match after lowercase/strip,
-        2. else the longest class name that is a substring of the phrase or vice versa,
-        3. else dropped (counted in stats['dropped_unmatched_labels']).
-      With low text thresholds, phrases often span several classes ("wine glass cup potted
-      plant") or subword fragments ("gife"), so rule 2 can pick the wrong class; phrases matching
-      more than one class are counted in stats['ambiguous_phrases'].
+Prompt "name . name . ... ." in chunks of cfg.chunk_size classes, merged with class-wise NMS. Each box's class:
+mean token probability over each class name (label_assignment: tokens) or HF phrase matching (phrase).
 """
 from __future__ import annotations
 

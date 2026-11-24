@@ -1,17 +1,4 @@
-"""Locate KITTI 2D-object *training* images and labels on disk.
-
-Supports two layouts under a root directory:
-  - Kaggle re-pack (what this project uses, data/kitti/):
-        <root>/train/{images,labels}/  and  <root>/val/{images,labels}/
-    The train/val split there is Kaggle's own and is ignored; both halves together
-    are the full official labeled training split (7,481 frames). <root>/test/ has no
-    labels and is never used.
-  - Official cvlibs zips:
-        <root>/training/{image_2,label_2}/
-
-Labels are the original 15-field KITTI text format (type, truncated, occluded, alpha,
-bbox left/top/right/bottom in pixels, dims, location, rotation_y).
-"""
+"""Locate KITTI training images and labels (Kaggle train/val re-pack or official training/ layout)."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -28,11 +15,7 @@ _LAYOUTS = [
 
 
 def kitti_index(root: Path = DEFAULT_KITTI_ROOT) -> dict[str, tuple[Path | None, Path | None]]:
-    """Map frame id (e.g. '000123') -> (image_path, label_path) for the labeled split.
-
-    Uses the first layout found under `root`. A missing image or label is None.
-    Raises FileNotFoundError if no known layout exists.
-    """
+    """Map frame id -> (image_path, label_path) using the first layout found under root."""
     root = Path(root)
     for layout in _LAYOUTS:
         if not any((root / img).is_dir() for img, _ in layout):

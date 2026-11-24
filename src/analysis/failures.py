@@ -1,25 +1,6 @@
-"""M9: failure-case mining and gallery on the KITTI subset (default label policy).
+"""KITTI failure mining: classify detections (TP / duplicate / ignored / FP) and missed GT; render a gallery.
 
-Usage: .venv/bin/python -m src.analysis.failures
-
-Every detection with score >= DISPLAY (0.3) is classified per image and class (car / person / truck)
-with the greedy score-sorted IoU >= 0.5 matcher from M6:
-  TP          matched to a GT box of its class
-  duplicate   overlaps (IoU > 0.5) a GT box of its class that a higher-scoring detection already took
-  ignored     not matched, but inside an ignore region of its class (intersection / detection area
-              >= 0.5, as COCOeval does for crowd regions): Van, Cyclist, Tram, Misc or DontCare
-  FP          everything else, split into
-                wrong class   IoU >= 0.5 with a GT box of another eval class (e.g. "truck" on a car)
-                localization  0.1 <= best IoU with a same-class GT < 0.5
-                background    no meaningful overlap with any GT box
-A high-confidence FP has score > 0.5. A missed GT box has no TP detection at score >= DISPLAY.
-Mapping-induced cases: detections on Van / Cyclist ignore regions, and (from a live 80-class
-re-run on frames containing cyclists) "bicycle" and "person" boxes on KITTI Cyclist boxes.
-
-Gallery (report/figures/failures/): GT green (ignore regions dashed gray), TP blue, FP and duplicates
-red, detections on ignore regions dashed light blue, the box the caption is about drawn thick.
-Picks prefer disagreement: a miss that the other models found, an FP the other models did not make.
-Writes report/failure_cases.md, report/tables/failure_counts.md, results/analysis/failures.json.
+Writes report/failure_cases.md, report/tables/failure_counts.md and report/figures/failures/.
 """
 from __future__ import annotations
 
@@ -227,8 +208,7 @@ HYP = {
     "van": "COCO has no van class, so the model calls a van '{det}'. Neutral under Van: ignore, an FP under Van: car.",
     "cyclist": "COCO splits a cyclist into a person and a bicycle; KITTI labels one Cyclist box, so neither matches.",
 }
-# Notes from looking at the rendered gallery images (frame id -> observation). They describe what is
-# visible in that frame only; they are not general claims.
+# Observations from inspecting the rendered frames (frame id -> note).
 NOTES = {
     1755: "The 0.99 'person' sits right beside a KITTI Cyclist ignore region and appears to be part of that "
           "cyclist, but less than half of the box lies inside the region, so it counts as an FP.",

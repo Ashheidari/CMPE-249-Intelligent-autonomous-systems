@@ -1,20 +1,6 @@
-"""Evaluate COCO-format predictions with pycocotools COCOeval (bbox). The only source of mAP numbers.
+"""pycocotools COCOeval (bbox) -> metrics.json: the 12 standard stats plus per-class AP / AP50 / AP75.
 
-Usage:
-  .venv/bin/python -m src.eval.coco_eval --run results/<run_id> [--cat-ids 1 3 8] [--out FILE]
-  .venv/bin/python -m src.eval.coco_eval --gt GT.json --pred predictions.json [--img-ids-from-pred] --out FILE
-
-With --run, the GT file and image set (first `limit` images by id) come from the run's config.json,
-and metrics go to <run>/metrics.json (or --out). --cat-ids restricts evaluation to a subset of
-categories (used in M6 to compare COCO and KITTI on car/person/truck only).
-
-metrics.json contains:
-  stats:        the 12 standard COCOeval numbers (AP, AP50, ..., ARl), in [0, 1]
-  per_class:    {class name: {AP, AP50, AP75, AP_by_iou, n_gt}} where
-                AP   = mean of precision[iou, recall, k, area=all, maxDets=100] over all IoU
-                       thresholds and recall points, ignoring -1 entries (-1 = no GT for the class),
-                AP50 / AP75 = the same at IoU 0.50 / 0.75 only, AP_by_iou = at each of the 10 IoUs.
-                A class with no (non-crowd) GT in the evaluated images gets null.
+Usage: python -m src.eval.coco_eval --run results/<run_id> [--cat-ids 1 3 8] [--out FILE]
 """
 from __future__ import annotations
 
@@ -39,11 +25,7 @@ def _mean_valid(p: np.ndarray) -> float | None:
 
 
 def evaluate(gt: COCO, preds: list[dict], img_ids: list[int], cat_ids: list[int] | None = None) -> dict:
-    """Run COCOeval(bbox) on `img_ids` x `cat_ids` (default: all GT categories).
-
-    preds: COCO results [{image_id, category_id, bbox [x, y, w, h], score}].
-    Returns {'stats': {name: float}, 'per_class': {...}, 'summary': str, ...}.
-    """
+    """COCOeval on img_ids x cat_ids. preds: COCO results with bbox [x, y, w, h]."""
     cat_ids = sorted(cat_ids or gt.getCatIds())
     img_set = set(img_ids)
     preds = [p for p in preds if p["image_id"] in img_set and p["category_id"] in cat_ids]

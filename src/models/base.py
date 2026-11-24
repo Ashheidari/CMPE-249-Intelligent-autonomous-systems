@@ -9,11 +9,7 @@ from PIL import Image
 
 
 class Detector(ABC):
-    """A pretrained 2D detector.
-
-    Every model returns class *names*, not IDs. The evaluator maps names to the dataset's
-    category IDs, so the COCO label space and the KITTI mapping live in one place.
-    """
+    """Pretrained 2D detector. Returns class names, not ids; the evaluator maps names to dataset ids."""
 
     name: str
 
@@ -27,15 +23,11 @@ class Detector(ABC):
     def predict(self, image: Image.Image, class_names: list[str]) -> dict:
         """Detect objects in one RGB image.
 
-        Returns {'boxes':  np.ndarray[N, 4] float32, absolute-pixel xyxy in ORIGINAL image coords,
-                 'scores': np.ndarray[N] float32, sorted descending,
-                 'labels': list[str] of length N (class names)}.
-        Closed-set models ignore `class_names` except for filtering their output to it;
-        open-vocabulary models use it as the text prompt.
+        Returns {'boxes': [N, 4] float32 xyxy in original-image px, 'scores': [N] sorted descending,
+        'labels': list of N class names}.
         """
 
-    # Staged interface, used by the speed benchmark (src/eval/benchmark.py) to time each part.
-    # postprocess(forward(preprocess(img, names)), ...) returns the same dict as predict().
+    # Staged interface for the benchmark: postprocess(forward(preprocess(...))) == predict().
     def preprocess(self, image: Image.Image, class_names: list[str]) -> dict:
         """PIL RGB image -> model inputs on self.device (resize, normalize, tokenize, ...)."""
         raise NotImplementedError

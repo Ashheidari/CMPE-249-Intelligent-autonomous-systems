@@ -1,14 +1,6 @@
-"""COCO-format dataset registry shared by inference and evaluation.
+"""Dataset registry (COCO-format GT + image root) shared by inference and evaluation.
 
-Both datasets are described by a COCO-format GT JSON plus an image root:
-  - coco:  COCO val2017, 5,000 images, 80 categories (ids 1..90 with gaps).
-  - kitti: the fixed 1,500-frame KITTI subset from M2, categories car=3, person=1, truck=8
-           (COCO's own ids), ignore regions as iscrowd=1.
-  - kitti_native: the same 1,500 frames with KITTI-native classes car, van, truck, pedestrian,
-           cyclist (ids 101-105; M8, Grounding DINO only). Its class names are the text prompt.
-
-Image selection is deterministic: images sorted by id, `--limit N` keeps the first N. Inference
-and evaluation both call `select_image_ids`, so they always agree on the image set.
+Image selection is deterministic: sorted image ids, the first N with --limit.
 """
 from __future__ import annotations
 

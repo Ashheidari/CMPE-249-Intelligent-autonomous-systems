@@ -17,18 +17,15 @@ class FasterRCNN(Detector):
     def __init__(self, device: str, cfg: dict[str, Any]) -> None:
         super().__init__(device, cfg)
         weights = FasterRCNN_ResNet50_FPN_V2_Weights[cfg["weights"]]
-        # Note: torchvision resizes INSIDE the model (GeneralizedRCNNTransform: min side 800,
-        # max side 1333) and maps boxes back, so outputs are already in original-image pixels.
+        # Resize (min 800 / max 1333) happens inside the model; boxes come back in original px.
         self.model = fasterrcnn_resnet50_fpn_v2(
             weights=weights,
             box_score_thresh=cfg["box_score_thresh"],
             box_detections_per_img=cfg["box_detections_per_img"],
         ).eval().to(device)
-        # weights.transforms() only converts PIL -> float tensor in [0, 1], shape [3, H, W];
-        # mean/std normalization also happens inside the model.
+        # PIL -> float tensor [3, H, W] in [0, 1]; normalization is inside the model.
         self.to_tensor = weights.transforms()
-        # Index into the 91-entry torchvision label space ('__background__' and 'N/A' gaps
-        # included), so label id k -> COCO class name.
+        # 91-entry torchvision label list (with N/A gaps): label id -> COCO class name.
         self.categories: list[str] = weights.meta["categories"]
 
     @torch.no_grad()
@@ -39,9 +36,7 @@ class FasterRCNN(Detector):
         return make_result(out["boxes"].cpu().numpy(), out["scores"].cpu().numpy(), labels,
                            class_names, self.cfg["box_detections_per_img"])
 
-    # ---- staged path for the benchmark. Same computation as GeneralizedRCNN.forward in eval mode,
-    # split so that the final per-class NMS (roi_heads.postprocess_detections) is in postprocess.
-    # The RPN's proposal NMS is inside self.model.rpn and therefore stays in forward.
+    # Staged path: GeneralizedRCNN.forward split so the final NMS is in postprocess (RPN NMS stays in forward).
     @torch.no_grad()
     def preprocess(self, image: Image.Image, class_names: list[str]) -> dict:
         x = self.to_tensor(image.convert("RGB")).to(self.device)  # [3, H, W] in [0, 1]

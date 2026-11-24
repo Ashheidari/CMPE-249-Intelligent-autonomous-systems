@@ -1,7 +1,4 @@
-"""Record software versions and hardware info to env.txt (reproducibility record).
-
-Usage: .venv/bin/python scripts/record_env.py [--out env.txt]
-"""
+"""Write env.txt: package versions, OS, chip, RAM and GPU availability."""
 from __future__ import annotations
 
 import argparse

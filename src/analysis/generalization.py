@@ -1,17 +1,6 @@
-"""M6 analysis 1: cross-dataset generalization (COCO -> KITTI). Re-uses saved predictions only.
+"""Analysis 1 (COCO -> KITTI): shared-class COCO eval, recall by occlusion/truncation, label-policy re-scoring.
 
-Usage: .venv/bin/python -m src.analysis.generalization
-
-Computes, for each model:
-  1. Shared-class COCO evaluation: COCOeval on COCO restricted to car/person/truck (catIds 1, 3, 8),
-     so COCO and KITTI AP / APs / APm / APl compare the same three classes.
-     -> results/<model>_coco/metrics_shared3.json
-  2. KITTI recall at IoU >= 0.5 for car and person, split by KITTI occlusion level and truncation
-     bucket, with a small custom matcher (see `greedy_match`), at two score thresholds:
-     0.001 (every detection kept for mAP) and 0.3 (the visualization threshold).
-  3. Label-policy sensitivity: the saved KITTI predictions re-evaluated against GT built with
-     Van: car (and, as an extra, Cyclist: person) instead of ignore. No re-inference.
-Writes results/analysis/generalization.json and report/tables/generalization_*.md.
+Uses saved predictions only. Writes results/analysis/generalization.json and report/tables/generalization_*.md.
 """
 from __future__ import annotations
 
@@ -70,12 +59,7 @@ def iou_xywh(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 def greedy_match(gt_boxes: np.ndarray, det_boxes: np.ndarray, det_scores: np.ndarray,
                  iou_thr: float = IOU_MATCH) -> np.ndarray:
-    """Greedy, score-sorted one-to-one matching for one image and one class.
-
-    Detections are visited from highest to lowest score; each takes the still-unmatched GT box
-    with the highest IoU, if that IoU >= iou_thr. Returns a bool array [G]: GT box was found.
-    Only real (non-crowd) GT boxes are passed in; ignore regions play no part in recall.
-    """
+    """Greedy score-sorted one-to-one matching (IoU >= iou_thr) for one image and class; returns found flags [G]."""
     found = np.zeros(len(gt_boxes), dtype=bool)
     if len(gt_boxes) == 0 or len(det_boxes) == 0:
         return found

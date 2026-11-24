@@ -1,12 +1,4 @@
-"""Verify the KITTI 2D-object labeled training split is in place.
-
-Default root is data/kitti (Kaggle re-pack with train/ + val/); the official
-training/{image_2,label_2} layout is also accepted. Checks: 7,481 frames, every frame
-has both an image and a label, every label line has the 15 KITTI fields, and the
-DontCare regions are present. Exits 0 if OK, 1 with instructions otherwise.
-
-Usage: .venv/bin/python scripts/check_kitti.py [--root data/kitti]
-"""
+"""Check the KITTI training split: 7,481 paired frames with 15-field labels."""
 from __future__ import annotations
 
 import argparse

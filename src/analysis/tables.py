@@ -1,14 +1,4 @@
-"""Turn results/<model>_<dataset>/{metrics,config}.json into report tables.
-
-Usage: .venv/bin/python -m src.analysis.tables
-
-Writes to report/tables/:
-  main_results.md / .csv   model x dataset, all 12 COCOeval stats, plus device and mean predict time
-  per_class_kitti.md       AP and AP50 for car / person / truck per model, COCO vs. KITTI, with the drop
-  published_check.md       our COCO AP vs. the published value for each checkpoint
-  speed.md                 latency per stage, FPS, stability and memory from results/benchmark/*/benchmark.json
-All AP/AR values are in percent (COCOeval numbers x 100), rounded to 1 decimal.
-"""
+"""Report tables (report/tables/*.md) from results/*/metrics.json and results/benchmark/*/benchmark.json."""
 from __future__ import annotations
 
 import csv

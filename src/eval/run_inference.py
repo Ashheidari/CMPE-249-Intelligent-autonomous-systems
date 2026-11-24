@@ -1,27 +1,7 @@
-"""Run one detector on one dataset and write COCO-format predictions.
+"""Run one detector on one dataset -> results/<run_id>/predictions.json (COCO format) + config.json.
 
-Usage:
-  .venv/bin/python -m src.eval.run_inference --model {faster_rcnn,yolo11s,gdino} --dataset {coco,kitti,kitti_native}
-      [--limit N] [--device mps] [--run-id ID] [--overwrite] [--set KEY=VALUE ...] [--rename CLASS=TEXT ...]
-
-Outputs, in results/<run_id>/ (run_id defaults to <model>_<dataset>[_limit<N>]):
-  predictions.json      COCO results format: [{image_id, category_id, bbox: [x, y, w, h], score}]
-  config.json           model settings, dataset, image count, device, versions, label stats, timing
-  predictions.partial.jsonl
-                        one line per finished image; used to resume an interrupted run and
-                        deleted once predictions.json is written
-
-Label handling: every model is asked for the same 80 COCO classes on both datasets (for Grounding
-DINO this is the text prompt). Predicted class names are then mapped to the dataset's category ids:
-  - on COCO all 80 names map;
-  - on KITTI only the eval classes (car, person, truck) map; all other predicted classes are dropped
-    and counted in config.json label_stats.dropped_non_eval_class.
-  - kitti_native (M8, Grounding DINO): the prompt is the dataset's own 5 class names
-    ("car . van . truck . pedestrian . cyclist ."), all of which map.
---set overrides model settings (run id gets a suffix, e.g. yolo11s_kitti_imgsz1280). --rename sends a
-different wording for one class (e.g. pedestrian="walking person"); predicted labels are mapped back.
-A predicted name outside COCO's 80 (should never happen) is counted in dropped_unknown_label.
-Boxes come from the detector as xyxy original-image pixels and are converted to xywh here.
+Usage: python -m src.eval.run_inference --model M --dataset D [--limit N] [--set KEY=VALUE] [--rename CLASS=TEXT]
+Interrupted runs resume from predictions.partial.jsonl.
 """
 from __future__ import annotations
 
@@ -51,11 +31,7 @@ def versions() -> dict[str, str]:
 
 def to_coco_results(det: dict, image_id: int, name2id: dict[str, int],
                     all_names: set[str]) -> tuple[list[dict], dict[str, int]]:
-    """Convert one image's detections to COCO result dicts.
-
-    det: {'boxes': [N, 4] xyxy original px, 'scores': [N], 'labels': list[str]}.
-    Returns (results with bbox [x, y, w, h], counts of dropped detections by reason).
-    """
+    """Detections (xyxy px) -> COCO results (xywh); classes not in name2id are dropped and counted."""
     out, dropped = [], {"non_eval_class": 0, "unknown_label": 0}
     for (x0, y0, x1, y1), s, name in zip(det["boxes"].tolist(), det["scores"].tolist(), det["labels"]):
         if name not in name2id:
@@ -181,8 +157,7 @@ def main() -> None:
         "n_predictions": len(preds),
         "label_stats": {f"dropped_{k}": sum(recs[i]["dropped"][k] for i in img_ids)
                         for k in ("non_eval_class", "unknown_label")},
-        # predict() time per image incl. model preprocessing/postprocessing, excl. image decode;
-        # not a benchmark (see src/eval/benchmark.py), just a record of this run
+        # predict() time of this run (not a benchmark; see src/eval/benchmark.py)
         "timing": {"predict_ms_mean": round(sum(ms) / len(ms), 1),
                    "predict_s_total": round(sum(ms) / 1000, 1),
                    "wall_clock_s_total": round(sum(s.get("wall_clock_s", 0) for s in config["sessions"]), 1)},

@@ -1,12 +1,4 @@
-"""M1 smoke test: run all 3 detectors on the same 5 COCO val2017 images.
-
-Saves visualizations to results/smoke/<model>/, prints detection counts and per-image time,
-and writes results/smoke/summary.json. As a numeric alignment check, reports the fraction of
-detections with score >= 0.5 that overlap a same-class GT box at IoU >= 0.5 (a resize offset
-would make this collapse).
-
-Usage: .venv/bin/python scripts/smoke_test.py [--device mps] [--models faster_rcnn yolo11s gdino]
-"""
+"""Run all 3 detectors on 5 COCO images; save visualizations to results/smoke/ and print timings."""
 from __future__ import annotations
 
 import argparse

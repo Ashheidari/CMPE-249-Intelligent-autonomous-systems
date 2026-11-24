@@ -1,18 +1,6 @@
-"""All report figures. Reads results/*/metrics*.json and results/analysis/*.json only.
+"""All report figures (report/figures/), from results/*/metrics*.json and results/analysis/*.json.
 
-Usage: .venv/bin/python -m src.analysis.plots
-
-M6 figures (report/figures/):
-  per_class_ap.png         per-class AP, COCO vs. KITTI, one panel per model
-  ap_by_size.png           APs / APm / APl on the shared classes, COCO vs. KITTI, per model
-  recall_vs_occlusion.png  KITTI recall at IoU 0.5 by occlusion level, car and person
-  ap_vs_iou.png            per-class AP at each IoU threshold 0.50..0.95, COCO vs. KITTI
-M7 figures:
-  speed_accuracy.png       AP vs. median latency (log x), COCO and KITTI, annotated with peak memory
-  latency_breakdown.png    stacked preprocess / forward / postprocess latency, one panel per model
-
-Color always encodes the model (validated categorical slots 1-3); COCO is drawn in neutral gray
-or dashed so color never means "dataset". Exact numbers are in the Markdown tables in report/tables/.
+Color always encodes the model; COCO is drawn gray or dashed.
 """
 from __future__ import annotations
 

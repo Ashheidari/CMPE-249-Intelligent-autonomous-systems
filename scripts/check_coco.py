@@ -1,7 +1,4 @@
-"""Verify COCO val2017: 5,000 images on disk and instances_val2017.json loads with pycocotools.
-
-Usage: .venv/bin/python scripts/check_coco.py
-"""
+"""Check that COCO val2017 has 5,000 images and a loadable annotation file."""
 from __future__ import annotations
 
 import sys

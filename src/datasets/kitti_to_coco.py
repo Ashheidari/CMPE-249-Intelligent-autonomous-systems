@@ -1,19 +1,7 @@
-"""Convert KITTI 2D-object labels (seeded subset of the training split) to a COCO GT JSON.
+"""Convert the fixed KITTI subset to COCO-format GT using COCO category ids.
 
-Label policy comes from configs/kitti_mapping.yaml. Each KITTI type maps either to a COCO
-class name in `eval_classes` or to "ignore".
-
-Why ignore regions are written as iscrowd=1: pycocotools treats a GT with iscrowd=1 as an ignore
-region. A detection matched to it is neither a true positive nor a false positive, and missing it
-costs nothing. This is what we want for KITTI types COCO has no clean class for (Van, Cyclist,
-Tram, Misc) and for DontCare areas, so a model is not punished for correctly boxing a van.
-COCOeval matches per category, so an ignore box only absorbs detections of its own category;
-we therefore write every ignore box once per eval class (car, person, truck).
-Crowd matching uses IoU = intersection / detection area, so a large DontCare region can absorb
-several small detections inside it.
-
-Box format: KITTI bbox is (left, top, right, bottom) in pixels; COCO bbox is [x, y, w, h].
-Usage: .venv/bin/python -m src.datasets.kitti_to_coco [--mapping configs/kitti_mapping.yaml] [--out ...]
+Types mapped to "ignore" become iscrowd=1 regions, written once per eval class (COCOeval matches per class).
+Usage: python -m src.datasets.kitti_to_coco [--mapping YAML] [--out JSON] [--stats MD]
 """
 from __future__ import annotations
 
@@ -38,12 +26,7 @@ SMALL, MEDIUM = 32 ** 2, 96 ** 2  # COCO area cutoffs (px^2)
 
 
 def parse_label_file(path: Path) -> list[dict[str, Any]]:
-    """Parse one KITTI label file. Keeps type, truncated, occluded and the bbox (xyxy px).
-
-    Line format (15 fields): type truncated occluded alpha left top right bottom h w l x y z rot_y.
-    truncated is a float in [0, 1]; occluded is 0 (visible), 1 (partly), 2 (largely), 3 (unknown);
-    DontCare lines use -1 for both.
-    """
+    """Parse one KITTI label file -> [{type, truncated, occluded (0-3), bbox_xyxy (px)}]."""
     objs = []
     for line in path.read_text().splitlines():
         f = line.split()

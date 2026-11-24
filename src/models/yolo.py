@@ -20,9 +20,7 @@ class YOLO11(Detector):
         self.names: dict[int, str] = self.model.names  # class index -> COCO class name
 
     def predict(self, image: Image.Image, class_names: list[str]) -> dict:
-        # Ultralytics letterboxes to imgsz (long side 640, minimal padding), runs NMS, and
-        # scales boxes back, so result.boxes.xyxy is in original-image pixels.
-        # A PIL image is treated as RGB and converted to BGR internally.
+        # Ultralytics letterboxes, runs NMS and rescales: boxes come back in original px.
         r = self.model.predict(image.convert("RGB"), imgsz=self.cfg["imgsz"], conf=self.cfg["conf"],
                                iou=self.cfg["iou"], max_det=self.cfg["max_det"],
                                device=self.device, verbose=False)[0]
@@ -30,7 +28,7 @@ class YOLO11(Detector):
         return make_result(r.boxes.xyxy.cpu().numpy(), r.boxes.conf.cpu().numpy(), labels,
                            class_names, self.cfg["max_det"])
 
-    # ---- staged path for the benchmark: the three steps of Ultralytics' predictor, called directly.
+    # Staged path for the benchmark: Ultralytics' predictor steps, called directly.
     def _predictor(self, image: Image.Image):
         if self.model.predictor is None:  # first call sets up the predictor with our settings
             self.predict(image, [])

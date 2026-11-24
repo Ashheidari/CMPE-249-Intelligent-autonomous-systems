@@ -44,11 +44,7 @@ def parse_overrides(items: list[str] | None) -> dict[str, Any]:
 
 
 def build_detector(name: str, device: str | None = None, overrides: dict[str, Any] | None = None) -> Detector:
-    """Build a detector on the preferred device and run one dummy prediction.
-
-    If the dummy run fails on a GPU backend, rebuild on CPU and record why in
-    `detector.stats['device_fallback']` (this ends up in config.json).
-    """
+    """Build a detector on the preferred device; fall back to CPU if a test prediction fails there."""
     cfg = load_model_cfg(name)
     unknown = set(overrides or {}) - set(cfg)
     if unknown:

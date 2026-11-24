@@ -1,14 +1,4 @@
-"""M2 acceptance check for the KITTI COCO-format GT.
-
-1. Loads the JSON with pycocotools.COCO.
-2. Renders 20 random subset images (seed 42) with GT to results/kitti_gt_check/
-   (evaluated boxes solid, ignore regions dashed gray).
-3. Evaluator sanity test: GT boxes submitted as predictions must give AP = 1.0, and adding
-   detections of every eval class on top of each ignore region must leave AP at 1.0
-   (they must be neither TP nor FP).
-
-Usage: .venv/bin/python scripts/kitti_gt_check.py [--ann data/kitti/annotations/kitti_subset_coco.json]
-"""
+"""Render 20 KITTI GT frames and check that GT used as predictions scores AP 1.0."""
 from __future__ import annotations
 
 import argparse

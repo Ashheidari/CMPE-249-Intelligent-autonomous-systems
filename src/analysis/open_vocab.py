@@ -1,20 +1,6 @@
-"""M8 analysis 3 (bonus): closed-set vs. open-vocabulary, plus two follow-up experiments from M7.
+"""Analysis 3: Grounding DINO with the KITTI-native prompt, scored mapped (car/person/truck) and native (5 classes).
 
-Usage: .venv/bin/python -m src.analysis.open_vocab   (after the runs in README step 9)
-
-Grounding DINO was run on the KITTI subset with the KITTI-native prompt
-"car . van . truck . pedestrian . cyclist ." (dataset kitti_native, category ids 101-105).
-The same predictions are scored two ways:
-  (a) mapped:  car + van -> car, pedestrian -> person, truck -> truck, cyclist dropped, against the
-               default KITTI GT (car / person / truck, with Van and Cyclist as ignore regions).
-               Compared with the COCO-80-prompt run from M4 (results/gdino_kitti). A "car only"
-               variant drops van detections instead of merging them, to isolate the van merge.
-  (b) native:  per-class AP on all 5 KITTI classes (Van and Cyclist are real classes here).
-               COCO-trained closed-set models have no van or cyclist class, so they cannot do this.
-Prompt sensitivity: the pedestrian class sent as "pedestrian", "person" or "walking person".
-Follow-ups: YOLO11s on KITTI at imgsz 1280 vs. 640; Grounding DINO on COCO (first 200 images)
-with one 80-class prompt vs. 4 prompts of 20.
-Writes results/analysis/open_vocab.json, report/tables/open_vocab.md, report/tables/followup_experiments.md.
+Also tabulates prompt wordings and the two ablations -> report/tables/open_vocab.md, followup_experiments.md.
 """
 from __future__ import annotations
 

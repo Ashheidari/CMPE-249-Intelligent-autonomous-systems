@@ -1,34 +1,7 @@
-"""Latency and memory benchmark for one detector on one dataset (batch size 1).
+"""Speed/memory benchmark: batch 1, warm-up + timed images, preprocess / forward / postprocess timed separately.
 
-Usage:
-  .venv/bin/python -m src.eval.benchmark --model {faster_rcnn,yolo11s,gdino} --dataset {coco,kitti}
-      [--warmup 20] [--n 200] [--repeats 2] [--device mps] [--check 20] [--set KEY=VALUE ...]
-
-Protocol:
-  - Image list: the first warmup + n images of the dataset sorted by id, the same for every model
-    (saved to results/benchmark/<dataset>_images.txt). Images are decoded into memory first, so
-    JPEG/PNG decoding is NOT timed; timing starts from a PIL RGB image.
-  - `warmup` untimed images, then `n` timed images, repeated `repeats` times (to check stability).
-  - Each image is split into three stages, with a device synchronize before every timestamp:
-      preprocess   PIL -> model input on device (resize/letterbox, normalize, tokenized prompts)
-      forward      the network
-      postprocess  decode, score threshold, NMS, rescale to original pixels, top-k, copy to CPU
-    Settings are the evaluation settings from configs/models.yaml (score threshold 0.001, 100 dets),
-    so postprocess times are for the mAP setting, not a deployment threshold.
-    Where NMS happens:
-      faster_rcnn  final class-wise NMS in postprocess; RPN proposal NMS is inside forward
-      yolo11s      NMS in postprocess
-      gdino        no NMS within a prompt; the cross-chunk class-wise NMS is in postprocess. forward
-                   is 4 passes (one per prompt chunk of 20 COCO classes), text encoder included.
-  - Grounding DINO text-encoder share: the BERT text backbone is also timed on its own on the same
-    prompt chunks (n times) and reported next to the forward time. This is an estimate: inside the
-    real forward pass the text encoder uses a slightly different attention mask, same sequence length.
-  - Memory (MPS): torch.mps.current_allocated_memory() (tensors) and driver_allocated_memory()
-    (everything the Metal driver holds), peak sampled after each image. Apple Silicon has unified
-    memory shared by CPU and GPU, so this is NOT equivalent to CUDA VRAM.
-  - --check N first runs predict() and the staged path on N images and asserts they agree.
-
-Output: results/benchmark/<model>_<dataset>/benchmark.json
+Usage: python -m src.eval.benchmark --model M --dataset D [--set KEY=VALUE]
+Output: results/benchmark/<model>_<dataset>[_overrides]/benchmark.json
 """
 from __future__ import annotations
 
