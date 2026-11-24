@@ -1,4 +1,4 @@
-# From Everyday Photos to Street Scenes: Transfer, Speed and Vocabulary of Three COCO-Pretrained Object Detectors
+# From COCO to KITTI Without Fine-Tuning: Accuracy, Speed, and Vocabulary of Three Object Detector Families
 
 TODO(user): author, course (CMPE 249, Intelligent Autonomous Systems), date.
 
@@ -76,7 +76,7 @@ not a property of the weights.
 | Car | car | same class |
 | Pedestrian, Person_sitting | person | COCO has one person class |
 | Truck | truck | same class |
-| Van | ignore (sensitivity test: car) | COCO has no van class; COCO models call vans car or truck |
+| Van | ignore (sensitivity test: car) | COCO has no van class; the models call vans car or truck |
 | Cyclist | ignore (sensitivity test: person) | COCO splits a cyclist into person + bicycle |
 | Tram, Misc, DontCare | ignore | no COCO equivalent / unlabelled regions |
 
@@ -230,7 +230,7 @@ here.
 
 TODO(user): turn these into prose and add your own.
 
-- **No fine-tuning.** All results are zero-shot transfer of COCO-pretrained weights. A short
+- **No fine-tuning.** All results use the pretrained weights without fine-tuning. A short
   fine-tune on KITTI would likely change the ranking.
 - **MPS timings are not NVIDIA CUDA timings.** Apple's unified memory is shared with the CPU. MPS also
   compiles kernels the first time it sees each input shape (141 vs. 13.5 ms per image for YOLO11s on

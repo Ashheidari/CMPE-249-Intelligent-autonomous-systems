@@ -1,6 +1,6 @@
-# Zero-Shot Transfer of COCO-Pretrained Object Detectors to KITTI
+# From COCO to KITTI Without Fine-Tuning: Accuracy, Speed, and Vocabulary of Three Object Detector Families
 
-This project evaluates three COCO-pretrained detectors from three design families, **without retraining**,
+This project evaluates three pretrained detectors from three design families, **without retraining**,
 on COCO val2017 and a 1,500-frame KITTI subset. It then analyzes cross-dataset generalization, the
 speed–accuracy tradeoff, and closed-set vs. open-vocabulary detection.
 
