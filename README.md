@@ -31,7 +31,7 @@ configs/         models.yaml (per-model settings), kitti_mapping*.yaml (KITTI ->
 src/models/      common Detector interface + Faster R-CNN, YOLO11s, Grounding DINO wrappers
 src/datasets/    dataset registry (coco.py), KITTI file index, KITTI -> COCO converter
 src/eval/        run_inference.py (predictions), coco_eval.py (pycocotools metrics), benchmark.py (speed)
-src/analysis/    tables, plots, generalization, speed_accuracy, open_vocab, failures, build_report
+src/analysis/    tables, plots, generalization, speed_accuracy, open_vocab, failures
 scripts/         Python helpers called below (environment record, dataset checks, cross-check, ...)
 data/            datasets (git-ignored, except the fixed KITTI subset list data/kitti/subset_1500.txt)
 results/         per-run config.json / metrics.json / benchmark.json (predictions.json are git-ignored)
@@ -255,15 +255,6 @@ python -m src.analysis.open_vocab        # -> report/tables/open_vocab.md, follo
 ```bash
 python -m src.analysis.failures          # -> report/failure_cases.md, report/tables/failure_counts.md, report/figures/failures/
 ```
-
-### Step 11: Report
-
-Markdown draft with all generated tables included (optional):
-
-```bash
-python -m src.analysis.build_report      # report/report_template.md -> report/report_draft.md
-```
-
 
 ## 5. Where the results are
 
