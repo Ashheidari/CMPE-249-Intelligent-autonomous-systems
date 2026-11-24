@@ -87,20 +87,22 @@
 </ul>
 
 <h2>4. Commands and Configurations</h2>
-<p>The repository reproduces every result from a clean clone. Each command is appended to <code>logs/commands.log</code>, and every run writes its full configuration (model, checkpoint, input size, thresholds, device, versions) to <code>results/&lt;run&gt;/config.json</code>.</p>
+<p>The repository's <code>README.md</code> lists every command in run order, so the results can be reproduced from a clean clone without any wrapper script. Table 3 summarizes them; <i>M</i> ∈ {<code>faster_rcnn</code>, <code>yolo11s</code>, <code>gdino</code>} and <i>D</i> ∈ {<code>coco</code>, <code>kitti</code>}. Every run writes its full configuration (model, checkpoint, input size, thresholds, device, versions) to <code>results/&lt;run&gt;/config.json</code>, and the commands actually run are recorded in <code>logs/commands.log</code>.</p>
 <table class="small">
-<tr><th>Step</th><th class="l">Command</th><th class="l">Output</th></tr>
-<tr><td>Environment, COCO</td><td class="l"><code>scripts/m0_setup.sh</code></td><td class="l"><code>.venv</code>, <code>env.txt</code>, <code>data/coco/</code></td></tr>
-<tr><td>KITTI ground truth</td><td class="l"><code>scripts/m2_kitti.sh</code></td><td class="l"><code>kitti_subset_coco.json</code>, stats</td></tr>
-<tr><td>Pipeline check</td><td class="l"><code>scripts/m3_eval.sh</code></td><td class="l">200-image runs, YOLO cross-check</td></tr>
-<tr><td>Inference + evaluation</td><td class="l"><code>python -m src.eval.run_inference --model M --dataset D</code><br><code>python -m src.eval.coco_eval --run results/M_D</code></td><td class="l"><code>predictions.json</code>, <code>metrics.json</code></td></tr>
-<tr><td>All six full runs</td><td class="l"><code>scripts/m4_full_runs.sh</code></td><td class="l">results tables</td></tr>
-<tr><td>Speed benchmark</td><td class="l"><code>scripts/m5_benchmark.sh</code></td><td class="l"><code>benchmark.json</code></td></tr>
-<tr><td>Analyses</td><td class="l"><code>python -m src.analysis.{generalization,speed_accuracy,plots}</code></td><td class="l">tables, figures</td></tr>
-<tr><td>Open vocabulary, ablations</td><td class="l"><code>scripts/m8_open_vocab.sh</code> (uses <code>--rename</code>, <code>--set</code>)</td><td class="l">open-vocabulary tables</td></tr>
-<tr><td>Failure analysis</td><td class="l"><code>python -m src.analysis.failures</code></td><td class="l">gallery, failure counts</td></tr>
+<tr><th style="width:17%">Step</th><th class="l">Command (from the repository root, inside <code>.venv</code>)</th><th class="l">Output</th></tr>
+<tr><td>Environment</td><td class="l"><code>python3.11 -m venv .venv; pip install -r requirements.txt</code><br><code>export PYTORCH_ENABLE_MPS_FALLBACK=1; python scripts/record_env.py</code></td><td class="l"><code>env.txt</code></td></tr>
+<tr><td>Data checks</td><td class="l"><code>python scripts/check_coco.py; python scripts/check_kitti.py</code></td><td class="l">5,000 / 7,481 images</td></tr>
+<tr><td>KITTI ground truth</td><td class="l"><code>python -m src.datasets.kitti_to_coco</code></td><td class="l"><code>kitti_subset_coco.json</code></td></tr>
+<tr><td>Inference</td><td class="l"><code>python -m src.eval.run_inference --model M --dataset D [--limit 200]</code></td><td class="l"><code>predictions.json</code></td></tr>
+<tr><td>Evaluation</td><td class="l"><code>python -m src.eval.coco_eval --run results/M_D</code></td><td class="l"><code>metrics.json</code></td></tr>
+<tr><td>YOLO cross-check</td><td class="l"><code>python scripts/yolo_crosscheck.py</code></td><td class="l"><code>crosscheck.md</code></td></tr>
+<tr><td>Speed benchmark</td><td class="l"><code>python -m src.eval.benchmark --model M --dataset D</code></td><td class="l"><code>benchmark.json</code></td></tr>
+<tr><td>Label-policy variants</td><td class="l"><code>python -m src.datasets.kitti_to_coco --mapping configs/kitti_mapping_van_car.yaml --out ...</code></td><td class="l">alternative GT</td></tr>
+<tr><td>Open vocabulary</td><td class="l"><code>python -m src.eval.run_inference --model gdino --dataset kitti_native [--rename pedestrian=person]</code></td><td class="l">native-prompt runs</td></tr>
+<tr><td>Ablations</td><td class="l"><code>... --model yolo11s --dataset kitti --set imgsz=1280</code><br><code>... --model gdino --dataset coco --limit 200 --set chunk_size=80</code></td><td class="l">ablation runs</td></tr>
+<tr><td>Analyses, figures</td><td class="l"><code>python -m src.analysis.{tables,generalization,speed_accuracy,plots,open_vocab,failures}</code></td><td class="l">tables, figures</td></tr>
 </table>
-<div class="cap"><b>Table 3.</b> Commands in order. Settings live in <code>configs/models.yaml</code> and <code>configs/kitti_mapping*.yaml</code>; <code>--set KEY=VALUE</code> overrides a model setting for one run.</div>
+<div class="cap"><b>Table 3.</b> Commands in run order (full list in <code>README.md</code>). Settings live in <code>configs/models.yaml</code> and <code>configs/kitti_mapping*.yaml</code>; <code>--set KEY=VALUE</code> overrides one model setting for a run, and <code>--rename CLASS=TEXT</code> changes the prompt wording of one class.</div>
 
 <h2>5. Quantitative Results</h2>
 <p>All three detectors reproduce their published COCO accuracy, which confirms the pipeline before any comparison. Faster R-CNN reaches 46.9 AP against 46.7 in torchvision's model card [11], YOLO11s 45.5 against 47.0 [7], and Grounding DINO 46.7 against 48.4 for the same Swin-T checkpoint [8]. As a further check, YOLO11s was also scored by Ultralytics' own validator. Our pipeline is 0.7 AP below that validator's number. About 0.6 AP of the gap to pycocotools scoring the validator's predictions comes from its multi-label NMS, which can keep one box under several classes; our pipeline keeps the deployment default of one class per box. No result differs from its reference by more than 1.7 AP.</p>
