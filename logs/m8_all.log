@@ -1,0 +1,122 @@
+wrote data/kitti/annotations/kitti_subset_native.json: 1500 images, 20157 annotations
+# KITTI subset statistics
+
+- images: 1500
+- evaluated boxes: 7692
+- ignore regions (iscrowd=1, counted once each): 2493
+- mapping: `{'Car': 'car', 'Van': 'van', 'Truck': 'truck', 'Pedestrian': 'pedestrian', 'Person_sitting': 'pedestrian', 'Cyclist': 'cyclist', 'Tram': 'ignore', 'Misc': 'ignore', 'DontCare': 'ignore'}`
+
+## Evaluated boxes by class and COCO size (area < 32², < 96², else large)
+
+| class | boxes | small | medium | large | from KITTI types |
+|---|---|---|---|---|---|
+| car | 5687 | 948 | 3046 | 1693 | Car 5687 |
+| van | 564 | 82 | 312 | 170 | Van 564 |
+| truck | 199 | 31 | 117 | 51 | Truck 199 |
+| pedestrian | 936 | 209 | 475 | 252 | Pedestrian 906, Person_sitting 30 |
+| cyclist | 306 | 74 | 168 | 64 | Cyclist 306 |
+| **all** | 7692 | 1344 | 4118 | 2230 | |
+
+## Ignore regions by KITTI type
+
+| KITTI type | regions |
+|---|---|
+| DontCare | 2198 |
+| Misc | 196 |
+| Tram | 99 |
+
+## Evaluated boxes by occlusion level (0 visible, 1 partly, 2 largely, 3 unknown)
+
+| class | occ 0 | occ 1 | occ 2 | occ 3 |
+|---|---|---|---|---|
+| car | 2685 | 1725 | 1113 | 164 |
+| van | 143 | 184 | 133 | 104 |
+| truck | 85 | 61 | 24 | 29 |
+| pedestrian | 561 | 212 | 144 | 19 |
+| cyclist | 195 | 47 | 11 | 53 |
+
+gdino_kitti_native: AP 27.6 | AP50 47.5 | AP75 29.0 | 1500 images, 5 categories
+gdino_kitti_native_pedestrian-as-person: AP 27.6 | AP50 49.5 | AP75 28.2 | 1500 images, 5 categories
+gdino_kitti_native_pedestrian-as-walking_person: AP 26.2 | AP50 43.4 | AP75 28.6 | 1500 images, 5 categories
+yolo11s_kitti_imgsz1280: AP 35.9 | AP50 65.8 | AP75 35.2 | 1500 images, 3 categories
+gdino_coco_chunk_size80_limit200: AP 53.1 | AP50 67.6 | AP75 57.5 | 200 images, 80 categories
+loading annotations into memory...
+Done (t=0.02s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.11s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.06s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.10s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.09s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.07s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.09s)
+creating index...
+index created!
+# Closed-set vs. open-vocabulary on KITTI (Grounding DINO tiny)
+
+## (a) Mapped to car / person / truck (default KITTI GT, Van and Cyclist ignored)
+
+| model / prompt | AP (3 cls) | car | person | truck |
+|---|---|---|---|---|
+| Grounding DINO, COCO-80 prompt (M4) | 36.5 | 48.4 | 29.7 | 31.3 |
+| Grounding DINO, KITTI prompt, car+van -> car | 39.0 | 50.8 | 22.1 | 44.3 |
+| Grounding DINO, KITTI prompt, car only (van dropped) | 38.3 | 48.6 | 22.1 | 44.3 |
+| Faster R-CNN (closed-set, M4) | 37.8 | 50.2 | 29.9 | 33.3 |
+| YOLO11s (closed-set, M4) | 31.4 | 47.3 | 27.0 | 20.0 |
+
+KITTI prompt: `car . van . truck . pedestrian . cyclist .`. Cyclist detections are dropped in (a).
+
+## (b) Native KITTI classes (Van and Cyclist are real classes)
+
+|  | AP (5 cls) | car | van | truck | pedestrian | cyclist |
+|---|---|---|---|---|---|---|
+| AP | 27.6 | 48.4 | 24.7 | 36.2 | 18.1 | 10.9 |
+| AP50 | 47.5 | 81.0 | 36.9 | 54.5 | 37.0 | 27.9 |
+| GT boxes |  | 5687 | 564 | 199 | 936 | 306 |
+
+Faster R-CNN and YOLO11s cannot be scored here: COCO has no van or cyclist class.
+
+## Prompt wording for the pedestrian class
+
+| pedestrian sent as | pedestrian AP (native) | pedestrian AP50 | person AP (mapped) | AP (5 cls) | car | van | truck | cyclist | ms/img |
+|---|---|---|---|---|---|---|---|---|---|
+| "pedestrian" | 18.1 | 37.0 | 22.1 | 27.6 | 48.4 | 24.7 | 36.2 | 10.9 | 387 |
+| "person" | 24.0 | 56.3 | 28.0 | 27.6 | 46.2 | 22.7 | 36.9 | 8.0 | 385 |
+| "walking person" | 12.0 | 25.4 | 14.4 | 26.2 | 48.4 | 23.3 | 37.2 | 9.8 | 384 |
+
+Only the pedestrian wording changes; the other four names stay the same. All prompt words share one text encoding, so the other classes can move too.
+
+# Follow-up experiments (from the M7 hypotheses)
+
+## YOLO11s on KITTI: input size 640 vs. 1280
+
+| setting | AP | APs | APm | APl | car | person | truck | latency median (ms) | peak driver MB |
+|---|---|---|---|---|---|---|---|---|---|
+| imgsz 640 (default) | 31.4 | 21.3 | 29.1 | 43.5 | 47.3 | 27.0 | 20.0 | 8.3 | 118 |
+| imgsz 1280 | 35.9 | 23.9 | 35.4 | 44.3 | 51.4 | 28.3 | 28.1 | 16.5 | 1102 |
+
+## Grounding DINO on COCO (first 200 images): 4 prompts of 20 classes vs. 1 prompt of 80
+
+| setting | AP | AP50 | APs | APl | tokens per prompt | latency median (ms) | peak driver MB |
+|---|---|---|---|---|---|---|---|
+| 4 prompts x 20 classes (default) | 51.8 | 67.3 | 35.4 | 68.5 | [47, 56, 49, 49] | 2787 | 5409 |
+| 1 prompt x 80 classes | 53.1 | 67.6 | 36.9 | 70.0 | [195] | 740 | 5384 |
+
+AP on the first 200 COCO images only (the full-set AP of the default setting is 46.7). Latency from the M5 benchmark protocol on the same 200 timed images.
+

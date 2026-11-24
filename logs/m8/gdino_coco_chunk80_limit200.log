@@ -1,0 +1,117 @@
+W1124 14:09:31.538000 9302 .venv/lib/python3.11/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+loading annotations into memory...
+Done (t=0.13s)
+creating index...
+index created!
+Loading weights:   0%|          | 0/978 [00:00<?, ?it/s]Loading weights: 100%|██████████| 978/978 [00:00<00:00, 11455.08it/s]
+[gdino] chunk 1: 1 classes, 4 tokens
+gdino_coco_chunk_size80_limit200:   0%|          | 0/200 [00:00<?, ?img/s]gdino_coco_chunk_size80_limit200:   0%|          | 1/200 [00:01<03:41,  1.12s/img]gdino_coco_chunk_size80_limit200:   1%|          | 2/200 [00:01<02:55,  1.13img/s]gdino_coco_chunk_size80_limit200:   2%|▏         | 3/200 [00:02<02:47,  1.18img/s]gdino_coco_chunk_size80_limit200:   2%|▏         | 4/200 [00:03<02:45,  1.18img/s]gdino_coco_chunk_size80_limit200:   2%|▎         | 5/200 [00:04<02:50,  1.14img/s]gdino_coco_chunk_size80_limit200:   3%|▎         | 6/200 [00:05<02:46,  1.17img/s]gdino_coco_chunk_size80_limit200:   4%|▎         | 7/200 [00:06<02:42,  1.18img/s]gdino_coco_chunk_size80_limit200:   4%|▍         | 8/200 [00:06<02:26,  1.31img/s]gdino_coco_chunk_size80_limit200:   4%|▍         | 9/200 [00:07<02:28,  1.28img/s]gdino_coco_chunk_size80_limit200:   5%|▌         | 10/200 [00:08<02:25,  1.31img/s]gdino_coco_chunk_size80_limit200:   6%|▌         | 11/200 [00:09<02:27,  1.28img/s]gdino_coco_chunk_size80_limit200:   6%|▌         | 12/200 [00:09<02:28,  1.27img/s]gdino_coco_chunk_size80_limit200:   6%|▋         | 13/200 [00:10<02:23,  1.30img/s]gdino_coco_chunk_size80_limit200:   7%|▋         | 14/200 [00:11<02:19,  1.33img/s]gdino_coco_chunk_size80_limit200:   8%|▊         | 15/200 [00:12<02:19,  1.33img/s]gdino_coco_chunk_size80_limit200:   8%|▊         | 16/200 [00:12<02:16,  1.34img/s]gdino_coco_chunk_size80_limit200:   8%|▊         | 17/200 [00:13<02:15,  1.35img/s]gdino_coco_chunk_size80_limit200:   9%|▉         | 18/200 [00:14<02:05,  1.45img/s]gdino_coco_chunk_size80_limit200:  10%|▉         | 19/200 [00:14<02:06,  1.43img/s]gdino_coco_chunk_size80_limit200:  10%|█         | 20/200 [00:15<02:19,  1.29img/s]gdino_coco_chunk_size80_limit200:  10%|█         | 21/200 [00:16<02:21,  1.27img/s]gdino_coco_chunk_size80_limit200:  11%|█         | 22/200 [00:17<02:23,  1.24img/s]gdino_coco_chunk_size80_limit200:  12%|█▏        | 23/200 [00:18<02:18,  1.28img/s]gdino_coco_chunk_size80_limit200:  12%|█▏        | 24/200 [00:18<02:19,  1.26img/s]gdino_coco_chunk_size80_limit200:  12%|█▎        | 25/200 [00:19<02:15,  1.29img/s]gdino_coco_chunk_size80_limit200:  13%|█▎        | 26/200 [00:20<02:16,  1.28img/s]gdino_coco_chunk_size80_limit200:  14%|█▎        | 27/200 [00:21<02:16,  1.27img/s]gdino_coco_chunk_size80_limit200:  14%|█▍        | 28/200 [00:22<02:21,  1.21img/s]gdino_coco_chunk_size80_limit200:  14%|█▍        | 29/200 [00:22<02:18,  1.24img/s]gdino_coco_chunk_size80_limit200:  15%|█▌        | 30/200 [00:23<02:17,  1.24img/s]gdino_coco_chunk_size80_limit200:  16%|█▌        | 31/200 [00:24<02:12,  1.27img/s]gdino_coco_chunk_size80_limit200:  16%|█▌        | 32/200 [00:25<02:09,  1.30img/s]gdino_coco_chunk_size80_limit200:  16%|█▋        | 33/200 [00:26<02:13,  1.25img/s]gdino_coco_chunk_size80_limit200:  17%|█▋        | 34/200 [00:26<02:05,  1.32img/s]gdino_coco_chunk_size80_limit200:  18%|█▊        | 35/200 [00:27<02:03,  1.34img/s]gdino_coco_chunk_size80_limit200:  18%|█▊        | 36/200 [00:28<02:05,  1.31img/s]gdino_coco_chunk_size80_limit200:  18%|█▊        | 37/200 [00:29<02:13,  1.22img/s]gdino_coco_chunk_size80_limit200:  19%|█▉        | 38/200 [00:29<02:00,  1.35img/s]gdino_coco_chunk_size80_limit200:  20%|█▉        | 39/200 [00:30<02:03,  1.31img/s]gdino_coco_chunk_size80_limit200:  20%|██        | 40/200 [00:31<02:09,  1.24img/s]gdino_coco_chunk_size80_limit200:  20%|██        | 41/200 [00:32<02:04,  1.27img/s]gdino_coco_chunk_size80_limit200:  21%|██        | 42/200 [00:32<02:01,  1.30img/s]gdino_coco_chunk_size80_limit200:  22%|██▏       | 43/200 [00:33<02:03,  1.28img/s]gdino_coco_chunk_size80_limit200:  22%|██▏       | 44/200 [00:34<02:03,  1.26img/s]gdino_coco_chunk_size80_limit200:  22%|██▎       | 45/200 [00:35<01:59,  1.29img/s]gdino_coco_chunk_size80_limit200:  23%|██▎       | 46/200 [00:35<01:49,  1.41img/s]gdino_coco_chunk_size80_limit200:  24%|██▎       | 47/200 [00:36<01:49,  1.40img/s]gdino_coco_chunk_size80_limit200:  24%|██▍       | 48/200 [00:37<01:49,  1.39img/s]gdino_coco_chunk_size80_limit200:  24%|██▍       | 49/200 [00:38<01:53,  1.34img/s]gdino_coco_chunk_size80_limit200:  25%|██▌       | 50/200 [00:38<01:51,  1.35img/s]gdino_coco_chunk_size80_limit200:  26%|██▌       | 51/200 [00:39<01:54,  1.31img/s]gdino_coco_chunk_size80_limit200:  26%|██▌       | 52/200 [00:40<01:56,  1.27img/s]gdino_coco_chunk_size80_limit200:  26%|██▋       | 53/200 [00:41<01:56,  1.26img/s]gdino_coco_chunk_size80_limit200:  27%|██▋       | 54/200 [00:42<01:56,  1.26img/s]gdino_coco_chunk_size80_limit200:  28%|██▊       | 55/200 [00:42<01:52,  1.29img/s]gdino_coco_chunk_size80_limit200:  28%|██▊       | 56/200 [00:43<01:55,  1.25img/s]gdino_coco_chunk_size80_limit200:  28%|██▊       | 57/200 [00:44<01:55,  1.24img/s]gdino_coco_chunk_size80_limit200:  29%|██▉       | 58/200 [00:45<01:48,  1.30img/s]gdino_coco_chunk_size80_limit200:  30%|██▉       | 59/200 [00:46<01:50,  1.27img/s]gdino_coco_chunk_size80_limit200:  30%|███       | 60/200 [00:46<01:51,  1.26img/s]gdino_coco_chunk_size80_limit200:  30%|███       | 61/200 [00:47<01:51,  1.25img/s]gdino_coco_chunk_size80_limit200:  31%|███       | 62/200 [00:48<01:51,  1.24img/s]gdino_coco_chunk_size80_limit200:  32%|███▏      | 63/200 [00:49<01:46,  1.29img/s]gdino_coco_chunk_size80_limit200:  32%|███▏      | 64/200 [00:50<01:48,  1.25img/s]gdino_coco_chunk_size80_limit200:  32%|███▎      | 65/200 [00:50<01:45,  1.28img/s]gdino_coco_chunk_size80_limit200:  33%|███▎      | 66/200 [00:51<01:45,  1.27img/s]gdino_coco_chunk_size80_limit200:  34%|███▎      | 67/200 [00:52<01:45,  1.26img/s]gdino_coco_chunk_size80_limit200:  34%|███▍      | 68/200 [00:53<01:42,  1.29img/s]gdino_coco_chunk_size80_limit200:  34%|███▍      | 69/200 [00:53<01:40,  1.31img/s]gdino_coco_chunk_size80_limit200:  35%|███▌      | 70/200 [00:54<01:37,  1.33img/s]gdino_coco_chunk_size80_limit200:  36%|███▌      | 71/200 [00:55<01:40,  1.29img/s]gdino_coco_chunk_size80_limit200:  36%|███▌      | 72/200 [00:56<01:37,  1.31img/s]gdino_coco_chunk_size80_limit200:  36%|███▋      | 73/200 [00:57<01:39,  1.27img/s]gdino_coco_chunk_size80_limit200:  37%|███▋      | 74/200 [00:57<01:40,  1.26img/s]gdino_coco_chunk_size80_limit200:  38%|███▊      | 75/200 [00:58<01:37,  1.29img/s]gdino_coco_chunk_size80_limit200:  38%|███▊      | 76/200 [00:59<01:34,  1.31img/s]gdino_coco_chunk_size80_limit200:  38%|███▊      | 77/200 [01:00<01:32,  1.33img/s]gdino_coco_chunk_size80_limit200:  39%|███▉      | 78/200 [01:00<01:34,  1.30img/s]gdino_coco_chunk_size80_limit200:  40%|███▉      | 79/200 [01:01<01:34,  1.28img/s]gdino_coco_chunk_size80_limit200:  40%|████      | 80/200 [01:02<01:34,  1.26img/s]gdino_coco_chunk_size80_limit200:  40%|████      | 81/200 [01:03<01:26,  1.38img/s]gdino_coco_chunk_size80_limit200:  41%|████      | 82/200 [01:03<01:28,  1.33img/s]gdino_coco_chunk_size80_limit200:  42%|████▏     | 83/200 [01:04<01:31,  1.28img/s]gdino_coco_chunk_size80_limit200:  42%|████▏     | 84/200 [01:05<01:29,  1.30img/s]gdino_coco_chunk_size80_limit200:  42%|████▎     | 85/200 [01:06<01:28,  1.30img/s]gdino_coco_chunk_size80_limit200:  43%|████▎     | 86/200 [01:06<01:20,  1.42img/s]gdino_coco_chunk_size80_limit200:  44%|████▎     | 87/200 [01:07<01:23,  1.35img/s]gdino_coco_chunk_size80_limit200:  44%|████▍     | 88/200 [01:08<01:16,  1.46img/s]gdino_coco_chunk_size80_limit200:  44%|████▍     | 89/200 [01:08<01:17,  1.43img/s]gdino_coco_chunk_size80_limit200:  45%|████▌     | 90/200 [01:09<01:20,  1.36img/s]gdino_coco_chunk_size80_limit200:  46%|████▌     | 91/200 [01:10<01:22,  1.32img/s]gdino_coco_chunk_size80_limit200:  46%|████▌     | 92/200 [01:11<01:19,  1.36img/s]gdino_coco_chunk_size80_limit200:  46%|████▋     | 93/200 [01:11<01:21,  1.32img/s]gdino_coco_chunk_size80_limit200:  47%|████▋     | 94/200 [01:12<01:19,  1.33img/s]gdino_coco_chunk_size80_limit200:  48%|████▊     | 95/200 [01:13<01:15,  1.39img/s]gdino_coco_chunk_size80_limit200:  48%|████▊     | 96/200 [01:14<01:15,  1.38img/s]gdino_coco_chunk_size80_limit200:  48%|████▊     | 97/200 [01:14<01:17,  1.34img/s]gdino_coco_chunk_size80_limit200:  49%|████▉     | 98/200 [01:15<01:15,  1.34img/s]gdino_coco_chunk_size80_limit200:  50%|████▉     | 99/200 [01:16<01:12,  1.40img/s]gdino_coco_chunk_size80_limit200:  50%|█████     | 100/200 [01:17<01:11,  1.39img/s]gdino_coco_chunk_size80_limit200:  50%|█████     | 101/200 [01:17<01:11,  1.38img/s]gdino_coco_chunk_size80_limit200:  51%|█████     | 102/200 [01:18<01:13,  1.33img/s]gdino_coco_chunk_size80_limit200:  52%|█████▏    | 103/200 [01:19<01:15,  1.29img/s]gdino_coco_chunk_size80_limit200:  52%|█████▏    | 104/200 [01:19<01:08,  1.40img/s]gdino_coco_chunk_size80_limit200:  52%|█████▎    | 105/200 [01:20<01:08,  1.39img/s]gdino_coco_chunk_size80_limit200:  53%|█████▎    | 106/200 [01:21<01:10,  1.33img/s]gdino_coco_chunk_size80_limit200:  54%|█████▎    | 107/200 [01:22<01:09,  1.35img/s]gdino_coco_chunk_size80_limit200:  54%|█████▍    | 108/200 [01:22<01:07,  1.36img/s]gdino_coco_chunk_size80_limit200:  55%|█████▍    | 109/200 [01:23<01:05,  1.40img/s]gdino_coco_chunk_size80_limit200:  55%|█████▌    | 110/200 [01:24<01:04,  1.39img/s]gdino_coco_chunk_size80_limit200:  56%|█████▌    | 111/200 [01:25<01:04,  1.38img/s]gdino_coco_chunk_size80_limit200:  56%|█████▌    | 112/200 [01:25<01:06,  1.33img/s]gdino_coco_chunk_size80_limit200:  56%|█████▋    | 113/200 [01:26<01:05,  1.33img/s]gdino_coco_chunk_size80_limit200:  57%|█████▋    | 114/200 [01:27<01:04,  1.34img/s]gdino_coco_chunk_size80_limit200:  57%|█████▊    | 115/200 [01:28<01:02,  1.35img/s]gdino_coco_chunk_size80_limit200:  58%|█████▊    | 116/200 [01:28<01:04,  1.31img/s]gdino_coco_chunk_size80_limit200:  58%|█████▊    | 117/200 [01:29<01:04,  1.29img/s]gdino_coco_chunk_size80_limit200:  59%|█████▉    | 118/200 [01:30<01:04,  1.26img/s]gdino_coco_chunk_size80_limit200:  60%|█████▉    | 119/200 [01:31<01:04,  1.26img/s]gdino_coco_chunk_size80_limit200:  60%|██████    | 120/200 [01:32<01:02,  1.29img/s]gdino_coco_chunk_size80_limit200:  60%|██████    | 121/200 [01:32<01:00,  1.31img/s]gdino_coco_chunk_size80_limit200:  61%|██████    | 122/200 [01:33<00:58,  1.33img/s]gdino_coco_chunk_size80_limit200:  62%|██████▏   | 123/200 [01:34<00:57,  1.34img/s]gdino_coco_chunk_size80_limit200:  62%|██████▏   | 124/200 [01:35<00:58,  1.31img/s]gdino_coco_chunk_size80_limit200:  62%|██████▎   | 125/200 [01:35<00:56,  1.33img/s]gdino_coco_chunk_size80_limit200:  63%|██████▎   | 126/200 [01:36<00:55,  1.34img/s]gdino_coco_chunk_size80_limit200:  64%|██████▎   | 127/200 [01:37<00:55,  1.31img/s]gdino_coco_chunk_size80_limit200:  64%|██████▍   | 128/200 [01:38<00:55,  1.29img/s]gdino_coco_chunk_size80_limit200:  64%|██████▍   | 129/200 [01:38<00:55,  1.28img/s]gdino_coco_chunk_size80_limit200:  65%|██████▌   | 130/200 [01:39<00:55,  1.27img/s]gdino_coco_chunk_size80_limit200:  66%|██████▌   | 131/200 [01:40<00:55,  1.25img/s]gdino_coco_chunk_size80_limit200:  66%|██████▌   | 132/200 [01:41<00:54,  1.25img/s]gdino_coco_chunk_size80_limit200:  66%|██████▋   | 133/200 [01:42<00:52,  1.28img/s]gdino_coco_chunk_size80_limit200:  67%|██████▋   | 134/200 [01:42<00:50,  1.31img/s]gdino_coco_chunk_size80_limit200:  68%|██████▊   | 135/200 [01:43<00:48,  1.33img/s]gdino_coco_chunk_size80_limit200:  68%|██████▊   | 136/200 [01:44<00:49,  1.30img/s]gdino_coco_chunk_size80_limit200:  68%|██████▊   | 137/200 [01:45<00:49,  1.28img/s]gdino_coco_chunk_size80_limit200:  69%|██████▉   | 138/200 [01:46<00:49,  1.26img/s]gdino_coco_chunk_size80_limit200:  70%|██████▉   | 139/200 [01:46<00:47,  1.29img/s]gdino_coco_chunk_size80_limit200:  70%|███████   | 140/200 [01:47<00:47,  1.28img/s]gdino_coco_chunk_size80_limit200:  70%|███████   | 141/200 [01:48<00:47,  1.24img/s]gdino_coco_chunk_size80_limit200:  71%|███████   | 142/200 [01:49<00:46,  1.24img/s]gdino_coco_chunk_size80_limit200:  72%|███████▏  | 143/200 [01:49<00:44,  1.27img/s]gdino_coco_chunk_size80_limit200:  72%|███████▏  | 144/200 [01:50<00:43,  1.30img/s]gdino_coco_chunk_size80_limit200:  72%|███████▎  | 145/200 [01:51<00:43,  1.27img/s]gdino_coco_chunk_size80_limit200:  73%|███████▎  | 146/200 [01:52<00:43,  1.26img/s]gdino_coco_chunk_size80_limit200:  74%|███████▎  | 147/200 [01:53<00:42,  1.25img/s]gdino_coco_chunk_size80_limit200:  74%|███████▍  | 148/200 [01:53<00:40,  1.28img/s]gdino_coco_chunk_size80_limit200:  74%|███████▍  | 149/200 [01:54<00:39,  1.31img/s]gdino_coco_chunk_size80_limit200:  75%|███████▌  | 150/200 [01:55<00:39,  1.27img/s]gdino_coco_chunk_size80_limit200:  76%|███████▌  | 151/200 [01:56<00:39,  1.23img/s]gdino_coco_chunk_size80_limit200:  76%|███████▌  | 152/200 [01:57<00:37,  1.27img/s]gdino_coco_chunk_size80_limit200:  76%|███████▋  | 153/200 [01:57<00:36,  1.30img/s]gdino_coco_chunk_size80_limit200:  77%|███████▋  | 154/200 [01:58<00:35,  1.28img/s]gdino_coco_chunk_size80_limit200:  78%|███████▊  | 155/200 [01:59<00:35,  1.26img/s]gdino_coco_chunk_size80_limit200:  78%|███████▊  | 156/200 [02:00<00:35,  1.25img/s]gdino_coco_chunk_size80_limit200:  78%|███████▊  | 157/200 [02:01<00:34,  1.24img/s]gdino_coco_chunk_size80_limit200:  79%|███████▉  | 158/200 [02:01<00:32,  1.28img/s]gdino_coco_chunk_size80_limit200:  80%|███████▉  | 159/200 [02:02<00:31,  1.30img/s]gdino_coco_chunk_size80_limit200:  80%|████████  | 160/200 [02:03<00:31,  1.28img/s]gdino_coco_chunk_size80_limit200:  80%|████████  | 161/200 [02:04<00:30,  1.29img/s]gdino_coco_chunk_size80_limit200:  81%|████████  | 162/200 [02:04<00:28,  1.31img/s]gdino_coco_chunk_size80_limit200:  82%|████████▏ | 163/200 [02:05<00:25,  1.43img/s]gdino_coco_chunk_size80_limit200:  82%|████████▏ | 164/200 [02:06<00:25,  1.41img/s]gdino_coco_chunk_size80_limit200:  82%|████████▎ | 165/200 [02:06<00:24,  1.40img/s]gdino_coco_chunk_size80_limit200:  83%|████████▎ | 166/200 [02:07<00:25,  1.34img/s]gdino_coco_chunk_size80_limit200:  84%|████████▎ | 167/200 [02:08<00:22,  1.45img/s]gdino_coco_chunk_size80_limit200:  84%|████████▍ | 168/200 [02:09<00:23,  1.38img/s]gdino_coco_chunk_size80_limit200:  84%|████████▍ | 169/200 [02:09<00:23,  1.34img/s]gdino_coco_chunk_size80_limit200:  85%|████████▌ | 170/200 [02:10<00:22,  1.31img/s]gdino_coco_chunk_size80_limit200:  86%|████████▌ | 171/200 [02:11<00:22,  1.28img/s]gdino_coco_chunk_size80_limit200:  86%|████████▌ | 172/200 [02:12<00:21,  1.31img/s]gdino_coco_chunk_size80_limit200:  86%|████████▋ | 173/200 [02:12<00:20,  1.33img/s]gdino_coco_chunk_size80_limit200:  87%|████████▋ | 174/200 [02:13<00:19,  1.34img/s]gdino_coco_chunk_size80_limit200:  88%|████████▊ | 175/200 [02:14<00:18,  1.35img/s]gdino_coco_chunk_size80_limit200:  88%|████████▊ | 176/200 [02:15<00:17,  1.36img/s]gdino_coco_chunk_size80_limit200:  88%|████████▊ | 177/200 [02:15<00:16,  1.36img/s]gdino_coco_chunk_size80_limit200:  89%|████████▉ | 178/200 [02:16<00:16,  1.36img/s]gdino_coco_chunk_size80_limit200:  90%|████████▉ | 179/200 [02:17<00:15,  1.32img/s]gdino_coco_chunk_size80_limit200:  90%|█████████ | 180/200 [02:18<00:14,  1.33img/s]gdino_coco_chunk_size80_limit200:  90%|█████████ | 181/200 [02:18<00:14,  1.35img/s]gdino_coco_chunk_size80_limit200:  91%|█████████ | 182/200 [02:19<00:13,  1.31img/s]gdino_coco_chunk_size80_limit200:  92%|█████████▏| 183/200 [02:20<00:13,  1.28img/s]gdino_coco_chunk_size80_limit200:  92%|█████████▏| 184/200 [02:21<00:12,  1.33img/s]gdino_coco_chunk_size80_limit200:  92%|█████████▎| 185/200 [02:21<00:11,  1.34img/s]gdino_coco_chunk_size80_limit200:  93%|█████████▎| 186/200 [02:22<00:10,  1.31img/s]gdino_coco_chunk_size80_limit200:  94%|█████████▎| 187/200 [02:23<00:10,  1.28img/s]gdino_coco_chunk_size80_limit200:  94%|█████████▍| 188/200 [02:24<00:09,  1.27img/s]gdino_coco_chunk_size80_limit200:  94%|█████████▍| 189/200 [02:25<00:08,  1.29img/s]gdino_coco_chunk_size80_limit200:  95%|█████████▌| 190/200 [02:25<00:08,  1.24img/s]gdino_coco_chunk_size80_limit200:  96%|█████████▌| 191/200 [02:26<00:07,  1.24img/s]gdino_coco_chunk_size80_limit200:  96%|█████████▌| 192/200 [02:27<00:06,  1.27img/s]gdino_coco_chunk_size80_limit200:  96%|█████████▋| 193/200 [02:28<00:05,  1.30img/s]gdino_coco_chunk_size80_limit200:  97%|█████████▋| 194/200 [02:28<00:04,  1.32img/s]gdino_coco_chunk_size80_limit200:  98%|█████████▊| 195/200 [02:29<00:03,  1.34img/s]gdino_coco_chunk_size80_limit200:  98%|█████████▊| 196/200 [02:30<00:02,  1.35img/s]gdino_coco_chunk_size80_limit200:  98%|█████████▊| 197/200 [02:30<00:02,  1.43img/s]gdino_coco_chunk_size80_limit200:  99%|█████████▉| 198/200 [02:31<00:01,  1.36img/s]gdino_coco_chunk_size80_limit200: 100%|█████████▉| 199/200 [02:32<00:00,  1.32img/s]gdino_coco_chunk_size80_limit200: 100%|██████████| 200/200 [02:33<00:00,  1.32img/s]gdino_coco_chunk_size80_limit200: 100%|██████████| 200/200 [02:33<00:00,  1.30img/s]
+[gdino] chunk 1: 80 classes, 195 tokens
+wrote 16634 predictions for 200 images -> /Users/arashheidari/Desktop/Workspace/CMPE-249-Intelligent-autonomous-systems/results/gdino_coco_chunk_size80_limit200/predictions.json
+label stats: {'dropped_non_eval_class': 0, 'dropped_unknown_label': 0} | mean predict ms: 762.4 | device: mps
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=0.34s).
+Accumulating evaluation results...
+DONE (t=0.17s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.531
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.676
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.575
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.369
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.617
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.700
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.408
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.695
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.718
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.501
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.751
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.892
+
+class              n_gt      AP    AP50
+person              504    64.1    85.3
+bicycle              11    70.5    85.7
+car                  46    51.5    68.5
+motorcycle           21    72.6    94.7
+airplane              6    73.6    95.2
+bus                  25    68.6    89.0
+train                 5    60.4    60.4
+truck                15    35.3    53.6
+boat                  7    25.0    41.6
+traffic light        15    48.5    73.5
+fire hydrant          5    77.3    85.7
+stop sign             4    61.6    69.1
+parking meter         0       -       -
+bench                15    47.2    63.6
+bird                 11    50.8    77.1
+cat                   7    85.9   100.0
+dog                   2    90.0   100.0
+horse                 9    75.6    97.0
+sheep                10    65.9    73.2
+cow                   4    19.1    25.1
+elephant              6    90.2    95.8
+bear                  3    94.4   100.0
+zebra                11    80.5    97.7
+giraffe               1   100.0   100.0
+backpack             27    28.4    46.4
+umbrella              7    19.7    44.2
+handbag              21    15.4    21.3
+tie                  24    50.4    79.5
+suitcase              4    85.9   100.0
+frisbee               9    79.1    92.4
+skis                  5    70.0    88.6
+snowboard             0       -       -
+sports ball           4    22.8    42.2
+kite                 19    50.3    71.0
+baseball bat          4    78.1   100.0
+baseball glove        6    59.9   100.0
+skateboard            6    71.6    83.2
+surfboard            10    81.3    98.3
+tennis racket         6    22.7    42.1
+bottle               31    40.1    59.0
+wine glass           32    53.0    72.8
+cup                  49    64.5    80.6
+fork                 12    56.3    63.6
+knife                21    59.7    73.0
+spoon                13    34.4    43.4
+bowl                 31    45.5    58.0
+banana               19    29.7    43.3
+apple                 4    21.9    25.2
+sandwich              8    29.5    36.4
+orange                1    16.7    16.7
+broccoli             17    27.4    36.1
+carrot               13    24.0    38.6
+hot dog               3    10.6    13.3
+pizza                13    68.0    85.6
+donut                 1   100.0   100.0
+cake                  3    66.3    66.3
+chair                71    40.7    55.7
+couch                12    50.7    70.1
+potted plant          8    42.2    70.7
+bed                   9    52.9    74.4
+dining table         29    24.2    29.4
+toilet                4    67.8    69.9
+tv                   16    69.2    84.5
+laptop               14    78.7    89.4
+mouse                 5    63.4    87.3
+remote               10    18.7    24.7
+keyboard              9    45.2    54.2
+cell phone            9    14.4    23.1
+microwave             3    63.8    83.2
+oven                  2    28.9    67.0
+toaster               0       -       -
+sink                  9    53.7    78.7
+refrigerator          5    60.9    83.3
+book                 35     6.4    10.8
+clock                 8    53.1    75.2
+vase                 14    58.8    84.6
+scissors              2     0.0     0.0
+teddy bear            4    95.6   100.0
+hair drier            0       -       -
+toothbrush            0       -       -
+
+AP 53.1 | AP50 67.6 | AP75 57.5 | 200 images, 80 categories
+wrote results/gdino_coco_chunk_size80_limit200/metrics.json

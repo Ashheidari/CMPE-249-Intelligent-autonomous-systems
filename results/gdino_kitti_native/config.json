@@ -1,0 +1,71 @@
+{
+  "run_id": "gdino_kitti_native",
+  "model": "gdino",
+  "dataset": "kitti_native",
+  "limit": null,
+  "n_images": 1500,
+  "gt": "data/kitti/annotations/kitti_subset_native.json",
+  "eval_categories": {
+    "car": 101,
+    "van": 102,
+    "truck": 103,
+    "pedestrian": 104,
+    "cyclist": 105
+  },
+  "prompt_classes": [
+    "car",
+    "van",
+    "truck",
+    "pedestrian",
+    "cyclist"
+  ],
+  "overrides": {},
+  "prompt_aliases": {},
+  "detector": {
+    "model": "gdino",
+    "device": "mps",
+    "checkpoint": "IDEA-Research/grounding-dino-tiny",
+    "box_threshold": 0.05,
+    "text_threshold": 0.05,
+    "chunk_size": 20,
+    "chunk_nms_iou": 0.5,
+    "max_det": 100,
+    "max_text_tokens": 256,
+    "label_assignment": "tokens",
+    "stats": {
+      "chunk_token_counts": [
+        12
+      ],
+      "dropped_unmatched_labels": 0,
+      "ambiguous_phrases": 0
+    }
+  },
+  "versions": {
+    "python": "3.11.18",
+    "torch": "2.15.0",
+    "torchvision": "0.29.2",
+    "ultralytics": "8.4.214",
+    "transformers": "5.23.0",
+    "pycocotools": "2.0.11",
+    "numpy": "2.4.6",
+    "pillow": "13.0.0"
+  },
+  "status": "done",
+  "sessions": [
+    {
+      "started": "2026-11-24T13:38:42",
+      "n_images": 1500,
+      "wall_clock_s": 593.3
+    }
+  ],
+  "n_predictions": 149175,
+  "label_stats": {
+    "dropped_non_eval_class": 0,
+    "dropped_unknown_label": 0
+  },
+  "timing": {
+    "predict_ms_mean": 386.8,
+    "predict_s_total": 580.2,
+    "wall_clock_s_total": 593.3
+  }
+}

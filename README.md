@@ -120,3 +120,19 @@ and the write-up `report/analysis_generalization.md`.
 ```
 Outputs: `results/analysis/speed_accuracy.json`, `report/tables/speed_accuracy.md`, the figures, and the
 write-up `report/analysis_speed.md`.
+
+### 8. Analysis 3 (bonus): closed-set vs. open-vocabulary, plus follow-up experiments
+```bash
+scripts/m8_open_vocab.sh    # ~50 min on an M5
+```
+This builds the KITTI-native GT (`configs/kitti_mapping_native.yaml`: car, van, truck, pedestrian and
+cyclist as real classes) and runs Grounding DINO with the prompt `car . van . truck . pedestrian . cyclist .`,
+plus "person" and "walking person" wordings of the pedestrian class.
+- `run_inference --rename CLASS=TEXT` changes the wording of one class in the prompt.
+- `run_inference --set KEY=VALUE` and `benchmark --set KEY=VALUE` override a model setting. They are used
+  for two follow-up experiments: YOLO11s at `imgsz=1280` on KITTI, and Grounding DINO with one 80-class
+  prompt (`chunk_size=80`) on COCO.
+
+The script ends by running `python -m src.analysis.open_vocab`, which writes `report/tables/open_vocab.md`
+and `report/tables/followup_experiments.md`. Write-ups: `report/analysis_open_vocab.md`, and the follow-up
+section of `report/analysis_speed.md`.

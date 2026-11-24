@@ -92,3 +92,33 @@ Full table: [tables/speed_accuracy.md](tables/speed_accuracy.md); per-stage numb
   and the first-time compilation cost for each new input shape on MPS (see
   [tables/speed.md](tables/speed.md)) could change the ratios between models on a CUDA GPU. TODO(user)
 - TODO(user): which model you would choose for a real-time driving use case, and why.
+
+## Follow-up experiments (run in M8 to test H1 and H2)
+
+Full tables: [tables/followup_experiments.md](tables/followup_experiments.md).
+
+**H1, YOLO11s input size on KITTI.** The same model was run with `imgsz=1280` instead of 640.
+
+| setting | AP | APs | APm | APl | car | person | truck | latency median | peak driver memory |
+|---|---|---|---|---|---|---|---|---|---|
+| imgsz 640 (default) | 31.4 | 21.3 | 29.1 | 43.5 | 47.3 | 27.0 | 20.0 | 8.3 ms | 118 MB |
+| imgsz 1280 | 35.9 | 23.9 | 35.4 | 44.3 | 51.4 | 28.3 | 28.1 | 16.5 ms | 1,102 MB |
+
+- Doubling the input side adds **+4.5 AP**, which closes most of the gap to Faster R-CNN (37.8).
+- Latency goes from 8.3 to 16.5 ms, still about 12× faster than Faster R-CNN.
+- Most of the gain is in medium objects (+6.3) and truck (+8.1). This supports H1: downscaling the wide
+  KITTI frames cost YOLO11s accuracy.
+
+**H2, Grounding DINO prompt chunking (COCO, first 200 images).** The same model was run with one 80-class
+prompt (195 tokens) instead of four 20-class prompts.
+
+| setting | AP | AP50 | latency median | peak driver memory |
+|---|---|---|---|---|
+| 4 prompts × 20 classes (default, used in M4) | 51.8 | 67.3 | 2,787 ms | 5,409 MB |
+| 1 prompt × 80 classes | 53.1 | 67.6 | 740 ms | 5,384 MB |
+
+- One prompt is **3.8× faster and 1.3 AP better** on these 200 images. This supports H2: the chunking, not
+  the text encoder, caused most of Grounding DINO's latency.
+- The M4/M5 numbers use 4 chunks, so they understate Grounding DINO. A full-set run with
+  `--set chunk_size=80` would give the fair number (about 1 h on COCO). TODO(user): decide whether to
+  re-run M4/M5 for Grounding DINO with one prompt, or to report the 4-chunk setting and this ablation.

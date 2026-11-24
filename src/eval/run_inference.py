@@ -1,8 +1,8 @@
 """Run one detector on one dataset and write COCO-format predictions.
 
 Usage:
-  .venv/bin/python -m src.eval.run_inference --model {faster_rcnn,yolo11s,gdino} --dataset {coco,kitti}
-      [--limit N] [--device mps] [--run-id ID] [--overwrite]
+  .venv/bin/python -m src.eval.run_inference --model {faster_rcnn,yolo11s,gdino} --dataset {coco,kitti,kitti_native}
+      [--limit N] [--device mps] [--run-id ID] [--overwrite] [--set KEY=VALUE ...] [--rename CLASS=TEXT ...]
 
 Outputs, in results/<run_id>/ (run_id defaults to <model>_<dataset>[_limit<N>]):
   predictions.json      COCO results format: [{image_id, category_id, bbox: [x, y, w, h], score}]
@@ -16,6 +16,10 @@ DINO this is the text prompt). Predicted class names are then mapped to the data
   - on COCO all 80 names map;
   - on KITTI only the eval classes (car, person, truck) map; all other predicted classes are dropped
     and counted in config.json label_stats.dropped_non_eval_class.
+  - kitti_native (M8, Grounding DINO): the prompt is the dataset's own 5 class names
+    ("car . van . truck . pedestrian . cyclist ."), all of which map.
+--set overrides model settings (run id gets a suffix, e.g. yolo11s_kitti_imgsz1280). --rename sends a
+different wording for one class (e.g. pedestrian="walking person"); predicted labels are mapped back.
 A predicted name outside COCO's 80 (should never happen) is counted in dropped_unknown_label.
 Boxes come from the detector as xyxy original-image pixels and are converted to xywh here.
 """
@@ -33,9 +37,9 @@ from typing import Any
 from PIL import Image
 from tqdm import tqdm
 
-from ..datasets.coco import DATASETS, ROOT, coco80_names, load_gt, name_to_cat_id, select_image_ids
+from ..datasets.coco import DATASETS, ROOT, load_gt, name_to_cat_id, prompt_names, select_image_ids
 from ..devices import synchronize  # also sets PYTORCH_ENABLE_MPS_FALLBACK before torch loads
-from ..models import MODEL_NAMES, build_detector
+from ..models import MODEL_NAMES, build_detector, parse_overrides
 
 RESULTS = ROOT / "results"
 
@@ -84,9 +88,18 @@ def main() -> None:
     ap.add_argument("--device", default=None, help="mps | cuda | cpu (default: best available)")
     ap.add_argument("--run-id", default=None)
     ap.add_argument("--overwrite", action="store_true", help="discard any previous output for this run id")
+    ap.add_argument("--set", nargs="+", default=None, metavar="KEY=VALUE",
+                    help="override model settings from configs/models.yaml, e.g. imgsz=1280 or chunk_size=80")
+    ap.add_argument("--rename", nargs="+", default=None, metavar="CLASS=TEXT",
+                    help='prompt wording variant: send TEXT instead of CLASS, e.g. pedestrian="walking person"')
     args = ap.parse_args()
+    overrides = parse_overrides(args.set)
+    aliases = dict(r.split("=", 1) for r in args.rename or [])
 
-    run_id = args.run_id or f"{args.model}_{args.dataset}" + (f"_limit{args.limit}" if args.limit else "")
+    suffix = "".join(f"_{k}{v}" for k, v in overrides.items())
+    suffix += "".join(f"_{k}-as-{v.replace(' ', '_')}" for k, v in aliases.items())
+    run_id = args.run_id or (f"{args.model}_{args.dataset}" + suffix
+                             + (f"_limit{args.limit}" if args.limit else ""))
     run_dir = RESULTS / run_id
     pred_path, partial_path, cfg_path = (run_dir / "predictions.json", run_dir / "predictions.partial.jsonl",
                                          run_dir / "config.json")
@@ -101,26 +114,36 @@ def main() -> None:
     gt = load_gt(args.dataset)
     img_ids = select_image_ids(gt, args.limit)
     name2id = name_to_cat_id(gt)
-    prompt_names = coco80_names()
+    class_names = prompt_names(args.dataset, gt)
+    unknown = set(aliases) - set(class_names)
+    if unknown:
+        raise SystemExit(f"--rename classes not in the prompt: {unknown}")
+    # The detector sees the (possibly reworded) prompt; its labels are mapped back to class names.
+    prompt = [aliases.get(n, n) for n in class_names]
+    back = {aliases.get(n, n): n for n in class_names}
 
-    # Resume: keep finished images only if the previous session used the same model/dataset/limit.
+    # Resume: keep finished images only if the previous session used the same settings.
     prev_cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
     done = read_partial(partial_path)
-    if done and (prev_cfg.get("model"), prev_cfg.get("dataset"), prev_cfg.get("limit")) != \
-            (args.model, args.dataset, args.limit):
+    same = (args.model, args.dataset, args.limit, overrides, aliases)
+    if done and (prev_cfg.get("model"), prev_cfg.get("dataset"), prev_cfg.get("limit"),
+                 prev_cfg.get("overrides", {}), prev_cfg.get("prompt_aliases", {})) != same:
         raise SystemExit(f"{partial_path} was written by a different run config; use --overwrite")
     done_ids = {r["image_id"] for r in done}
     todo = [i for i in img_ids if i not in done_ids]
     if done:
         print(f"resuming: {len(done_ids)} images done, {len(todo)} to go")
 
-    det_model = build_detector(args.model, args.device)
+    det_model = build_detector(args.model, args.device, overrides)
     sessions = prev_cfg.get("sessions", [])
     started = datetime.now().isoformat(timespec="seconds")
     config: dict[str, Any] = {
         "run_id": run_id, "model": args.model, "dataset": args.dataset, "limit": args.limit,
         "n_images": len(img_ids), "gt": str(DATASETS[args.dataset]["gt"].relative_to(ROOT)),
-        "eval_categories": name2id, "prompt_classes": "COCO-80 (ordered by category id)",
+        "eval_categories": name2id,
+        "prompt_classes": "COCO-80 (ordered by category id)" if prompt == class_names and len(prompt) == 80
+        else prompt,
+        "overrides": overrides, "prompt_aliases": aliases,
         "detector": det_model.describe(), "versions": versions(), "status": "running",
         "sessions": sessions + [{"started": started, "n_images": len(todo)}],
     }
@@ -134,10 +157,11 @@ def main() -> None:
             img = Image.open(img_root / info["file_name"]).convert("RGB")
             synchronize(det_model.device)
             t0 = time.perf_counter()
-            det = det_model.predict(img, prompt_names)
+            det = det_model.predict(img, prompt)
             synchronize(det_model.device)
             ms = (time.perf_counter() - t0) * 1000
-            res, dropped = to_coco_results(det, img_id, name2id, set(prompt_names))
+            det["labels"] = [back.get(l, l) for l in det["labels"]]
+            res, dropped = to_coco_results(det, img_id, name2id, set(class_names))
             f.write(json.dumps({"image_id": img_id, "ms": round(ms, 2), "dropped": dropped, "dets": res}) + "\n")
             f.flush()
     wall = time.perf_counter() - t_session

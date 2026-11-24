@@ -95,3 +95,18 @@
 [2026-11-17 07:52:56] .venv/bin/python -m src.analysis.plots
 [2026-11-17 07:56:19] .venv/bin/python -m src.analysis.speed_accuracy
 [2026-11-17 07:57:02] .venv/bin/python -m src.analysis.plots
+[2026-11-24 13:37:23] .venv/bin/python -m src.datasets.kitti_to_coco --mapping configs/kitti_mapping_native.yaml --out data/kitti/annotations/kitti_subset_native.json --stats results/analysis/kitti_stats_native.md
+[2026-11-24 13:38:37] .venv/bin/python -m src.datasets.kitti_to_coco --mapping configs/kitti_mapping_native.yaml --out data/kitti/annotations/kitti_subset_native.json --stats results/analysis/kitti_stats_native.md
+[2026-11-24 13:38:37] .venv/bin/python -m src.eval.run_inference --model gdino --dataset kitti_native
+[2026-11-24 13:48:36] .venv/bin/python -m src.eval.coco_eval --run results/gdino_kitti_native
+[2026-11-24 13:48:40] .venv/bin/python -m src.eval.run_inference --model gdino --dataset kitti_native --rename pedestrian=person
+[2026-11-24 13:58:36] .venv/bin/python -m src.eval.coco_eval --run results/gdino_kitti_native_pedestrian-as-person
+[2026-11-24 13:58:40] .venv/bin/python -m src.eval.run_inference --model gdino --dataset kitti_native --rename pedestrian=walking person
+[2026-11-24 14:08:35] .venv/bin/python -m src.eval.coco_eval --run results/gdino_kitti_native_pedestrian-as-walking_person
+[2026-11-24 14:08:39] .venv/bin/python -m src.eval.run_inference --model yolo11s --dataset kitti --set imgsz=1280
+[2026-11-24 14:09:15] .venv/bin/python -m src.eval.coco_eval --run results/yolo11s_kitti_imgsz1280
+[2026-11-24 14:09:18] .venv/bin/python -m src.eval.benchmark --model yolo11s --dataset kitti --set imgsz=1280
+[2026-11-24 14:09:29] .venv/bin/python -m src.eval.run_inference --model gdino --dataset coco --limit 200 --set chunk_size=80
+[2026-11-24 14:12:08] .venv/bin/python -m src.eval.coco_eval --run results/gdino_coco_chunk_size80_limit200
+[2026-11-24 14:12:09] .venv/bin/python -m src.eval.benchmark --model gdino --dataset coco --set chunk_size=80
+[2026-11-24 14:18:01] .venv/bin/python -m src.analysis.open_vocab

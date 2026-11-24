@@ -1,0 +1,15 @@
+# M8: KITTI-native label space for the open-vocabulary analysis (Grounding DINO only).
+# Van and Cyclist become real classes; category ids are our own (not COCO's), so this GT is never
+# mixed up with COCO-id predictions. Prompt order = id order: "car . van . truck . pedestrian . cyclist ."
+eval_classes: [car, van, truck, pedestrian, cyclist]
+category_ids: {car: 101, van: 102, truck: 103, pedestrian: 104, cyclist: 105}
+mapping:
+  Car: car
+  Van: van
+  Truck: truck
+  Pedestrian: pedestrian
+  Person_sitting: pedestrian   # same as the default policy (Person_sitting -> person)
+  Cyclist: cyclist
+  Tram: ignore
+  Misc: ignore
+  DontCare: ignore

@@ -2,7 +2,7 @@
 
 Usage:
   .venv/bin/python -m src.eval.benchmark --model {faster_rcnn,yolo11s,gdino} --dataset {coco,kitti}
-      [--warmup 20] [--n 200] [--repeats 2] [--device mps] [--check 20]
+      [--warmup 20] [--n 200] [--repeats 2] [--device mps] [--check 20] [--set KEY=VALUE ...]
 
 Protocol:
   - Image list: the first warmup + n images of the dataset sorted by id, the same for every model
@@ -44,7 +44,7 @@ from tqdm import tqdm
 
 from ..datasets.coco import DATASETS, ROOT, coco80_names, load_gt, select_image_ids
 from ..devices import synchronize
-from ..models import MODEL_NAMES, build_detector
+from ..models import MODEL_NAMES, build_detector, parse_overrides
 from .run_inference import versions
 
 OUT = ROOT / "results" / "benchmark"
@@ -128,7 +128,10 @@ def main() -> None:
     ap.add_argument("--repeats", type=int, default=2)
     ap.add_argument("--device", default=None)
     ap.add_argument("--check", type=int, default=20, help="compare predict() vs. staged path on N images (0: skip)")
+    ap.add_argument("--set", nargs="+", default=None, metavar="KEY=VALUE",
+                    help="override model settings (output dir gets a suffix, e.g. yolo11s_kitti_imgsz1280)")
     args = ap.parse_args()
+    overrides = parse_overrides(args.set)
 
     gt = load_gt(args.dataset)
     ids = select_image_ids(gt, args.warmup + args.n)
@@ -139,7 +142,7 @@ def main() -> None:
     warm, timed = images[:args.warmup], images[args.warmup:]
     names = coco80_names()
 
-    det = build_detector(args.model, args.device)
+    det = build_detector(args.model, args.device, overrides)
     dev = det.device
     if dev.startswith("mps"):
         torch.mps.empty_cache()
@@ -178,7 +181,7 @@ def main() -> None:
         "protocol": {"batch_size": 1, "warmup": args.warmup, "n_timed": args.n, "repeats": args.repeats,
                      "image_ids_file": str((OUT / f"{args.dataset}_images.txt").relative_to(ROOT)),
                      "decode_timed": False, "settings": "eval thresholds from configs/models.yaml"},
-        "detector": det.describe(), "versions": versions(),
+        "detector": det.describe(), "overrides": overrides, "versions": versions(),
         "staged_check": check, "runs": runs,
         "stability_rel_diff_mean_total": stability,
         "memory_mb": {"after_load": mem_after_load, "peak_during_timed": peak,
@@ -191,7 +194,7 @@ def main() -> None:
                                         "note": "BERT text backbone timed alone on the same prompt chunks"}
         print(f"text encoder: {te['mean']:.1f} ms/img = {100 * te['mean'] / fwd:.1f}% of forward")
 
-    out = OUT / f"{args.model}_{args.dataset}"
+    out = OUT / (f"{args.model}_{args.dataset}" + "".join(f"_{k}{v}" for k, v in overrides.items()))
     out.mkdir(parents=True, exist_ok=True)
     (out / "benchmark.json").write_text(json.dumps(result, indent=2))
     print(f"stability (max-min)/min of mean total over {args.repeats} runs: "

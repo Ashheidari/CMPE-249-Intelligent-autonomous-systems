@@ -34,13 +34,26 @@ def _construct(name: str, device: str, cfg: dict[str, Any]) -> Detector:
     raise ValueError(f"unknown model {name!r}; choose from {MODEL_NAMES}")
 
 
-def build_detector(name: str, device: str | None = None) -> Detector:
+def parse_overrides(items: list[str] | None) -> dict[str, Any]:
+    """['imgsz=1280', 'chunk_size=80'] -> {'imgsz': 1280, 'chunk_size': 80} (values parsed as YAML)."""
+    out = {}
+    for it in items or []:
+        k, v = it.split("=", 1)
+        out[k] = yaml.safe_load(v)
+    return out
+
+
+def build_detector(name: str, device: str | None = None, overrides: dict[str, Any] | None = None) -> Detector:
     """Build a detector on the preferred device and run one dummy prediction.
 
     If the dummy run fails on a GPU backend, rebuild on CPU and record why in
     `detector.stats['device_fallback']` (this ends up in config.json).
     """
     cfg = load_model_cfg(name)
+    unknown = set(overrides or {}) - set(cfg)
+    if unknown:
+        raise ValueError(f"unknown {name} config keys: {unknown}")
+    cfg.update(overrides or {})
     dev = pick_device(device)
     det = _construct(name, dev, cfg)
     try:

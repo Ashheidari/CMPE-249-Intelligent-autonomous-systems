@@ -75,6 +75,8 @@ def size_bucket(area: float) -> str:
 def build_coco(frames: list[str], index: dict, mapping_cfg: dict, kitti_root: Path) -> dict:
     """Build the COCO GT dict for `frames`. image_id = int(frame id); file_name relative to kitti_root."""
     eval_classes, mapping = mapping_cfg["eval_classes"], mapping_cfg["mapping"]
+    # Category ids: COCO's own ids by default; a mapping file may give its own (M8 native classes).
+    cat_ids = mapping_cfg.get("category_ids", COCO_IDS)
     unknown = set(mapping.values()) - set(eval_classes) - {"ignore"}
     if unknown:
         raise ValueError(f"mapping targets not in eval_classes: {unknown}")
@@ -92,11 +94,11 @@ def build_coco(frames: list[str], index: dict, mapping_cfg: dict, kitti_root: Pa
                 continue
             cats = eval_classes if target == "ignore" else [target]
             for c in cats:
-                anns.append({"id": len(anns) + 1, "image_id": int(fid), "category_id": COCO_IDS[c],
+                anns.append({"id": len(anns) + 1, "image_id": int(fid), "category_id": cat_ids[c],
                              "bbox": [x0, y0, w, h], "area": w * h,
                              "iscrowd": int(target == "ignore"),
                              "kitti_type": o["type"], "truncated": o["truncated"], "occluded": o["occluded"]})
-    categories = [{"id": COCO_IDS[c], "name": c, "supercategory": c} for c in eval_classes]
+    categories = [{"id": cat_ids[c], "name": c, "supercategory": c} for c in eval_classes]
     return {"info": {"description": "KITTI 2D object, seeded training subset, COCO format",
                      "mapping": mapping}, "images": images, "annotations": anns, "categories": categories}
 
