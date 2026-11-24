@@ -31,7 +31,7 @@ FIG = ROOT / "report" / "figures"
 MODELS = {"faster_rcnn": "Faster R-CNN", "yolo11s": "YOLO11s", "gdino": "Grounding DINO"}
 CLASSES = ["car", "person", "truck"]
 
-# Reference palette, light mode (validated: scripts/validate_palette.js, all-pairs, 3 slots)
+# Categorical palette, light mode: 3 hues checked for color-blind separation and contrast on the surface
 COLOR = {"faster_rcnn": "#2a78d6", "yolo11s": "#eb6834", "gdino": "#1baf7a"}
 COCO_GRAY = "#aeaca4"
 SURFACE, INK, INK2, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e2dc"

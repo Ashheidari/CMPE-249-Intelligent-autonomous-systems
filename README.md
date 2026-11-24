@@ -207,15 +207,6 @@ Markdown draft with all generated tables included (optional):
 python -m src.analysis.build_report      # report/report_template.md -> report/report_draft.md
 ```
 
-Submission PDF (9 pages), rendered from `report/submission/technical_report.html` with headless Chrome:
-
-```bash
-sed 's|{{AUTHOR}}|Your Name|' report/submission/technical_report.html > report/submission/.render.html
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --disable-gpu \
-    --no-pdf-header-footer --run-all-compositor-stages-before-draw --virtual-time-budget=5000 \
-    --print-to-pdf=report/submission/technical_report.pdf "file://$PWD/report/submission/.render.html"
-rm report/submission/.render.html
-```
 
 ## 4. Where the results are
 
@@ -247,6 +238,6 @@ rm report/submission/.render.html
   tokens`). The plan's phrase-matching rule is available as `label_assignment: phrase`.
 - **Determinism:** seed 42. The KITTI subset list and the benchmark image lists are saved and reused,
   never regenerated.
-- **Command log:** the reported runs were launched through `scripts/log_cmd.sh <command>`, which
-  appends each command to `logs/commands.log`. That is optional when reproducing. The `scripts/*.sh`
-  files are the shell wrappers originally used; they run exactly the commands listed above.
+- **Command log:** `logs/commands.log` records every command run for the reported results, with a
+  timestamp. Those runs were launched through small shell wrappers that are no longer part of the
+  repository; they ran exactly the commands listed in this README.

@@ -44,7 +44,7 @@
 <body>
 
 <h1>Zero-Shot Transfer of COCO-Pretrained Object Detectors to Driving Scenes: Accuracy, Speed, and Vocabulary</h1>
-<div class="byline">{{AUTHOR}}</div>
+<div class="byline">Arash Haji Heidari</div>
 <div class="meta">CMPE 249 Intelligent Autonomous Systems · 2D Object Detection, Track A (Experimental) · November 2026</div>
 
 <p class="abstract"><b>Abstract.</b> This report evaluates three pretrained object detectors from three design families on two datasets without any retraining. The detectors are a two-stage detector (Faster R-CNN), a one-stage detector (YOLO11s) and an open-vocabulary detector (Grounding DINO tiny). The datasets are the COCO validation set and a 1,500-frame subset of the KITTI driving benchmark. All accuracy numbers come from one evaluator. On COCO the three detectors lie within 1.4 AP of each other (45.5–46.9), while their latency on an Apple M5 GPU spans a factor of about 200 (13 ms to 2.8 s per image). On KITTI's car, person and truck classes, AP drops by 26–32%. The loss is concentrated in pedestrians and in tight localization: car AP does not drop at all, whereas pedestrian AP halves while recall at IoU 0.5 stays at 74–80%. Occlusion is the main cause of missed objects. Inspection suggests that annotation conventions (box extent, class definitions) explain part of the gap. Two ablations show that YOLO11s regains 4.5 AP on KITTI at 1280 px input, and that one Grounding DINO prompt instead of four is 3.8× faster. With KITTI-native class names, Grounding DINO reaches 40.7 AP and also detects vans and cyclists, which COCO-only models cannot represent.</p>

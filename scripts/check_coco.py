@@ -19,7 +19,7 @@ def main() -> int:
     ann_file = COCO_DIR / "annotations" / "instances_val2017.json"
     print(f"val2017 images on disk: {len(images)} (expected {EXPECTED})")
     if not ann_file.is_file():
-        print(f"missing {ann_file}; run scripts/download_coco.sh")
+        print(f"missing {ann_file}; download it as in README step 1")
         return 1
     coco = COCO(str(ann_file))
     n_img, n_ann, n_cat = len(coco.getImgIds()), len(coco.getAnnIds()), len(coco.getCatIds())

@@ -1,6 +1,6 @@
 """M8 analysis 3 (bonus): closed-set vs. open-vocabulary, plus two follow-up experiments from M7.
 
-Usage: .venv/bin/python -m src.analysis.open_vocab   (after scripts/m8_open_vocab.sh)
+Usage: .venv/bin/python -m src.analysis.open_vocab   (after the runs in README step 9)
 
 Grounding DINO was run on the KITTI subset with the KITTI-native prompt
 "car . van . truck . pedestrian . cyclist ." (dataset kitti_native, category ids 101-105).
