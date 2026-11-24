@@ -39,7 +39,79 @@ report/          tables/, figures/, analysis write-ups, submission/technical_rep
 logs/            commands.log (every command run for the reported results) and run logs
 ```
 
-## 3. Reproduce step by step
+## 3. Datasets
+
+Both datasets go under `data/`, which is git-ignored except for the committed KITTI frame list
+`data/kitti/subset_1500.txt`. Download them before running step 1 of section 4.
+
+### 3.1 COCO val2017 (~1 GB, automatic)
+
+Only the 5,000 validation images and `instances_val2017.json` are used. The annotation zip also contains
+train-set files; they are harmless.
+
+```bash
+mkdir -p data/coco && cd data/coco
+curl -L --fail -O http://images.cocodataset.org/zips/val2017.zip
+curl -L --fail -O http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+unzip -q val2017.zip && unzip -q annotations_trainval2017.zip
+rm val2017.zip annotations_trainval2017.zip
+cd ../..
+```
+
+### 3.2 KITTI 2D object detection (~12 GB, manual)
+
+KITTI requires a free registration, so it cannot be downloaded by script. Only the **labeled training
+split** (7,481 frames) is used, with its **original 15-field labels**. The code needs the `DontCare`,
+`truncated` and `occluded` fields. Use either source; the code detects the layout automatically.
+
+**Option A: official site.** Register at
+<https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d> and download:
+
+- "Download left color images of object data set" → `data_object_image_2.zip` (~12 GB)
+- "Download training labels of object data set" → `data_object_label_2.zip` (~5 MB)
+
+```bash
+mkdir -p data/kitti
+unzip -q data_object_image_2.zip -d data/kitti     # -> data/kitti/training/image_2/ (+ testing/, unused)
+unzip -q data_object_label_2.zip -d data/kitti     # -> data/kitti/training/label_2/
+```
+
+**Option B: Kaggle re-pack (used for the reported results).** On Kaggle, search for the dataset
+`kitti-object-detection-2d`, which contains `train/`, `val/` and `test/` folders, each with `images/`
+and `labels/`. Copy `train/` and `val/` into `data/kitti/`. The train/val split is Kaggle's own and is
+ignored: together the two halves are the full 7,481-frame training split, and `test/` (no labels) is
+not used. Check that a label file has 15 space-separated fields per line, e.g.
+`Car 0.00 0 1.55 614.24 181.78 727.31 284.77 1.57 1.73 4.15 1.00 1.75 13.22 1.62`.
+
+Do **not** use the Ultralytics `kitti.yaml` re-pack: its YOLO-format labels drop `DontCare`, occlusion
+and truncation, and its boxes are normalized by a fixed image size.
+
+### 3.3 Expected layout
+
+```
+data/
+├── coco/
+│   ├── val2017/                       5,000 .jpg images
+│   └── annotations/instances_val2017.json
+└── kitti/
+    ├── subset_1500.txt                committed: the fixed 1,500-frame subset (seed 42)
+    ├── training/image_2/*.png         Option A: 7,481 images
+    ├── training/label_2/*.txt         Option A: 7,481 labels
+    ├── train/{images,labels}/         Option B: together with val/, 7,481 frames
+    └── val/{images,labels}/           Option B
+```
+
+Folders created later by the pipeline: `data/kitti/annotations/` (COCO-format KITTI GT, step 3 and the
+analyses) and `data/coco_yolo/` (YOLO-format COCO labels for the Ultralytics cross-check, step 5).
+
+### 3.4 Check the data
+
+```bash
+python scripts/check_coco.py             # expects 5,000 images and a loadable instances_val2017.json
+python scripts/check_kitti.py            # expects 7,481 paired frames with 15-field labels and DontCare
+```
+
+## 4. Reproduce step by step
 
 Times are for the Apple M5 (MPS). The steps must run in this order, because later steps read
 earlier outputs. Set up the shell once, then run each block:
@@ -58,27 +130,11 @@ to redo one.
 
 ### Step 1: Data (~5 min for COCO, plus the manual KITTI download)
 
-COCO val2017 images and annotations:
+Download and place both datasets as described in section 3, then check them:
 
 ```bash
-mkdir -p data/coco && cd data/coco
-curl -L --fail -O http://images.cocodataset.org/zips/val2017.zip
-curl -L --fail -O http://images.cocodataset.org/annotations/annotations_trainval2017.zip
-unzip -q val2017.zip && unzip -q annotations_trainval2017.zip && rm val2017.zip annotations_trainval2017.zip
-cd ../..
-python scripts/check_coco.py             # expects 5,000 images and a loadable instances_val2017.json
-```
-
-**KITTI must be downloaded by hand** because it requires registration at
-<https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d>. Download "left color images of
-object data set" (`data_object_image_2.zip`, ~12 GB) and "training labels of object data set"
-(`data_object_label_2.zip`), and unzip both into `data/kitti/`. That gives
-`data/kitti/training/{image_2,label_2}/`. A Kaggle re-pack with `data/kitti/{train,val}/{images,labels}/`
-and the original 15-field labels also works; this project used it. Do **not** use the Ultralytics
-`kitti.yaml` re-pack: its YOLO-format labels drop `DontCare`, occlusion and truncation.
-
-```bash
-python scripts/check_kitti.py            # expects 7,481 paired frames with 15-field labels
+python scripts/check_coco.py
+python scripts/check_kitti.py
 ```
 
 ### Step 2: Smoke test (optional, ~1 min)
@@ -208,7 +264,7 @@ python -m src.analysis.build_report      # report/report_template.md -> report/r
 ```
 
 
-## 4. Where the results are
+## 5. Where the results are
 
 | What | File |
 |---|---|
@@ -221,7 +277,7 @@ python -m src.analysis.build_report      # report/report_template.md -> report/r
 | Failure cases | `report/failure_cases.md`, `report/figures/failures/` |
 | Environment and commands actually run | `env.txt`, `logs/commands.log` |
 
-## 5. Notes
+## 6. Notes
 
 - **Device:** `run_inference`, `benchmark`, `smoke_test.py` and `yolo_crosscheck.py` take
   `--device mps|cuda|cpu`. Without it, and in the analysis modules that re-run models, the default is
