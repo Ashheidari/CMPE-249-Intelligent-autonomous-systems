@@ -114,3 +114,26 @@
 [2026-11-24 14:38:15] .venv/bin/python -m src.analysis.failures
 [2026-11-24 14:45:50] .venv/bin/python -m src.analysis.failures
 [2026-11-24 14:52:55] .venv/bin/python -m src.analysis.failures
+# ---------------------------------------------------------------------------------------------
+# Commands run WITHOUT scripts/log_cmd.sh during M3-M9 (2026-11-15 to 2026-11-24), reconstructed
+# from the session record. Dates are exact; times were not recorded. Runs with --run-id _* were
+# throwaway tests whose results/ folders were deleted afterwards; read-only one-off checks
+# (python -c prints of JSON numbers, ls/grep/cat) are not listed.
+# [2026-11-15] .venv/bin/python -m src.eval.run_inference --model yolo11s --dataset coco --limit 10 --run-id _test
+# [2026-11-15] .venv/bin/python -m src.eval.coco_eval --run results/_test
+# [2026-11-15] .venv/bin/python -m src.eval.run_inference --model faster_rcnn --dataset kitti --limit 40 --run-id _resume   (killed after 8 images to test resume)
+# [2026-11-15] .venv/bin/python -m src.eval.run_inference --model faster_rcnn --dataset kitti --limit 40 --run-id _resume   (resumed)
+# [2026-11-15] .venv/bin/python <scratchpad>/val_single_label.py <scratchpad>/runs   (Ultralytics val with multi_label=False; later folded into scripts/yolo_crosscheck.py)
+# [2026-11-15] scripts/m3_eval.sh limit   (wrapper; its inner commands are logged above)
+# [2026-11-15] scripts/m3_eval.sh crosscheck   (wrapper; first yolo_crosscheck attempt failed on the dataset YAML)
+# [2026-11-16] .venv/bin/python -m src.eval.benchmark --model {faster_rcnn,yolo11s,gdino} --dataset kitti --warmup 2 --n 5 --check 5   (3 test runs; results deleted)
+# [2026-11-17] .venv/bin/python <scratchpad>/shape_test.py   (first-seen input shape test; later scripts/mps_shape_effect.py)
+# [2026-11-17] .venv/bin/python -m src.analysis.tables   (several re-renders while fixing speed.md)
+# [2026-11-17] .venv/bin/python -m src.analysis.plots   (re-renders after layout fixes)
+# [2026-11-24] .venv/bin/python -m src.eval.run_inference --model gdino --dataset kitti_native --limit 5 --run-id _t1
+# [2026-11-24] .venv/bin/python -m src.eval.run_inference --model gdino --dataset kitti_native --limit 5 --run-id _t2 --rename "pedestrian=walking person"
+# [2026-11-24] .venv/bin/python - (unit checks of greedy_match, ioa and classify_image on hand-made boxes)
+# ---------------------------------------------------------------------------------------------
+[2026-11-24 15:13:37] .venv/bin/python -m src.analysis.build_report
+[2026-11-24 15:13:59] .venv/bin/python -m src.analysis.build_report
+[2026-11-24 15:14:20] .venv/bin/python -m src.analysis.build_report

@@ -3,7 +3,26 @@
 Evaluation of three COCO-pretrained detectors (Faster R-CNN R50-FPN v2, YOLO11s, Grounding DINO tiny)
 on COCO val2017 and a KITTI subset, without retraining. See `Implementation-plan.md` for the full plan.
 
-## Reproduce
+## Reproduce from a clean clone, in order
+
+Times are for an Apple M5 (16 GB) on the MPS backend. Each step's details are in the numbered
+sections below. Large outputs (`predictions.json`, datasets, weights) are git-ignored; every
+`metrics.json`, `config.json`, `benchmark.json`, table and figure is committed.
+
+| # | Step | Command | Time | Main outputs |
+|---|---|---|---|---|
+| 0 | Environment, COCO download, dataset checks | `scripts/m0_setup.sh` | ~5 min + download | `.venv`, `env.txt`, `data/coco/` |
+| 0b | **KITTI by hand** (registration), then check | `.venv/bin/python scripts/check_kitti.py` | manual | `data/kitti/` |
+| 1 | Smoke test (optional) | `scripts/smoke_test.sh` | ~1 min | `results/smoke/` |
+| 2 | KITTI subset → COCO-format GT | `scripts/m2_kitti.sh` | ~1 min | `data/kitti/annotations/`, `results/kitti_stats.md` |
+| 3 | Pipeline check + YOLO cross-check | `scripts/m3_eval.sh` | ~30 min | `results/*_limit200/`, `results/yolo_crosscheck/` |
+| 4 | Full runs (3 models × 2 datasets) + tables | `scripts/m4_full_runs.sh` | ~5.5 h | `results/<model>_<dataset>/`, `report/tables/` |
+| 5 | Speed + memory benchmark | `scripts/m5_benchmark.sh` | ~40 min | `results/benchmark/`, `report/tables/speed.md` |
+| 6 | Analysis 1: generalization | see section 6 | ~2 min | `report/analysis_generalization.md`, figures |
+| 7 | Analysis 2: speed–accuracy | see section 7 | ~2 min | `report/analysis_speed.md`, figures |
+| 8 | Analysis 3 + ablations | `scripts/m8_open_vocab.sh` | ~50 min | `report/analysis_open_vocab.md` |
+| 9 | Failure analysis | `.venv/bin/python -m src.analysis.failures` | ~5 min | `report/failure_cases.md`, `report/figures/failures/` |
+| 10 | Report draft | `.venv/bin/python -m src.analysis.build_report` | seconds | `report/report_draft.md` |
 
 ### 0. Environment and data
 Requires Python 3.11 (`brew install python@3.11` on macOS).
@@ -146,3 +165,16 @@ This classifies every KITTI detection at score ≥ 0.3 as TP, duplicate, inside 
 frames containing cyclists, to count person + bicycle boxes on KITTI Cyclist boxes. It then renders
 13 gallery images, 3 of them side-by-side comparisons of all models. Outputs: `report/figures/failures/`,
 `report/tables/failure_counts.md`, `report/failure_cases.md` and `results/analysis/failures.json`.
+
+### 10. Report draft
+```bash
+.venv/bin/python -m src.analysis.build_report
+```
+This builds `report/report_draft.md` from `report/report_template.md`. Each `{{include: ...}}` line in
+the template is replaced by a generated table (`report/tables/*.md`, `results/kitti_stats.md`,
+`env.txt`), so every number in the draft traces back to a `metrics.json` or `benchmark.json`. Write in
+the template, not the draft, and rebuild after re-running any analysis. Places that need the author's
+interpretation are marked `TODO(user)`.
+
+`logs/commands.log` lists every command run through `scripts/log_cmd.sh`. It ends with a clearly marked,
+reconstructed list of the test and re-render commands that were run without it.
