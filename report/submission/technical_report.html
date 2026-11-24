@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Zero-Shot Transfer of COCO-Pretrained Detectors to KITTI</title>
+<style>
+  @page {
+    size: letter;
+    margin: 0.7in 0.75in 0.75in 0.75in;
+    @bottom-center { content: counter(page); font: 9pt "Times New Roman", serif; color: #444; }
+  }
+  :root { --ink: #111; --muted: #555; --rule: #bbb; --head: #f1f1ef; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font: 10pt/1.34 "Times New Roman", Times, serif; color: var(--ink); background: #fff; margin: 0; }
+  h1 { font-size: 16.5pt; line-height: 1.2; text-align: center; margin: 0 0 4pt; }
+  .byline { text-align: center; font-size: 10.5pt; margin-bottom: 2pt; }
+  .meta { text-align: center; font-size: 9.5pt; color: var(--muted); margin-bottom: 10pt; }
+  .abstract { font-size: 9.8pt; margin: 0 0.25in 10pt; text-align: justify; }
+  .abstract b:first-child { font-variant: small-caps; }
+  h2 { font-size: 12pt; margin: 12pt 0 4pt; break-after: avoid; }
+  h3 { font-size: 10.6pt; font-style: italic; font-weight: bold; margin: 8pt 0 3pt; break-after: avoid; }
+  p { margin: 0 0 5pt; text-align: justify; hyphens: auto; }
+  ul, ol { margin: 0 0 5pt 0; padding-left: 16pt; }
+  li { margin-bottom: 1.5pt; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 8.3pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 8.4pt; line-height: 1.25; margin: 3pt 0 2pt; break-inside: avoid; }
+  th, td { padding: 1.8pt 4pt; border-bottom: 0.5pt solid #ddd; text-align: right; vertical-align: top; }
+  th { background: var(--head); border-bottom: 0.8pt solid #888; font-weight: bold; }
+  th:first-child, td:first-child { text-align: left; }
+  td.l, th.l { text-align: left; }
+  tr.sep td { border-top: 0.8pt solid #888; }
+  .cap { font-size: 8.8pt; color: #222; margin: 2pt 0 8pt; text-align: left; }
+  .cap b { font-weight: bold; }
+  figure { margin: 4pt 0 8pt; break-inside: avoid; }
+  figure img { width: 100%; display: block; }
+  .row { display: flex; gap: 10pt; align-items: flex-start; }
+  .row > * { flex: 1 1 0; min-width: 0; }
+  .refs p { text-align: left; font-size: 8.8pt; margin-bottom: 2.5pt; padding-left: 20pt; text-indent: -20pt; }
+  .small { font-size: 9pt; }
+  .keep { break-inside: avoid; }
+  .pb { break-before: page; }
+</style>
+</head>
+<body>
+
+<h1>Zero-Shot Transfer of COCO-Pretrained Object Detectors to Driving Scenes: Accuracy, Speed, and Vocabulary</h1>
+<div class="byline">{{AUTHOR}}</div>
+<div class="meta">CMPE 249 Intelligent Autonomous Systems · 2D Object Detection, Track A (Experimental) · November 2026</div>
+
+<p class="abstract"><b>Abstract.</b> This report evaluates three pretrained object detectors from three design families on two datasets without any retraining. The detectors are a two-stage detector (Faster R-CNN), a one-stage detector (YOLO11s) and an open-vocabulary detector (Grounding DINO tiny). The datasets are the COCO validation set and a 1,500-frame subset of the KITTI driving benchmark. All accuracy numbers come from one evaluator. On COCO the three detectors lie within 1.4 AP of each other (45.5–46.9), while their latency on an Apple M5 GPU spans a factor of about 200 (13 ms to 2.8 s per image). On KITTI's car, person and truck classes, AP drops by 26–32%. The loss is concentrated in pedestrians and in tight localization: car AP does not drop at all, whereas pedestrian AP halves while recall at IoU 0.5 stays at 74–80%. Occlusion is the main cause of missed objects. Inspection suggests that annotation conventions (box extent, class definitions) explain part of the gap. Two ablations show that YOLO11s regains 4.5 AP on KITTI at 1280 px input, and that one Grounding DINO prompt instead of four is 3.8× faster. With KITTI-native class names, Grounding DINO reaches 40.7 AP and also detects vans and cyclists, which COCO-only models cannot represent.</p>
+
+<h2>1. Introduction</h2>
+<p>An autonomous system rarely trains its perception from scratch. More often it starts from a detector pretrained on a large generic dataset, which makes the size of the gap between that dataset and the deployment domain a practical engineering question. The Common Objects in Context (COCO) dataset contains everyday photographs of 80 object classes [1]. The KITTI benchmark, from the Karlsruhe Institute of Technology and Toyota Technological Institute, instead records street scenes from a car-mounted camera, with its own class definitions and labeling rules [2]. A detector that scores well on the first is therefore not guaranteed to score well on the second.</p>
+<p>This study measures that gap for three detector designs and asks three questions: (1) how much accuracy each design loses from COCO to KITTI, and why; (2) what the accuracy costs in latency and memory on a single consumer GPU; and (3) whether an open-vocabulary detector can use KITTI's own class names to recover accuracy and detect classes that COCO lacks. Sections 2–4 describe the models, data, setup and commands. Section 5 reports the main results, Sections 6–8 present three analyses, Section 9 examines failure cases, and Section 10 concludes.</p>
+
+<h2>2. Models and Datasets</h2>
+<h3>2.1 Three detector families</h3>
+<p>The three detectors differ in how they turn an image into boxes, which is why they were chosen. Faster R-CNN (region-based convolutional neural network) uses a region proposal network (RPN) to score preset anchor boxes on a ResNet-50 feature pyramid network (FPN), then classifies and refines about a thousand proposals in a second stage [3], [4]. The torchvision "v2" weights keep this architecture but use an improved training recipe [5], [11]. YOLO11s (You Only Look Once, version 11, small model) predicts box edges and class scores for every grid cell in one pass, without anchors or a proposal stage [6], [7]. Grounding DINO receives a text prompt along with the image and fuses a Swin Transformer image backbone with a Bidirectional Encoder Representations from Transformers (BERT) text encoder [8], [10], [14]. Its decoder, in the style of the DEtection TRansformer (DETR), uses 900 learned queries, each scored against every word of the prompt [9]. The checkpoint was loaded through the Hugging Face Transformers library [12]. Only the last of the three designs can be given new class names at test time.</p>
+
+<table>
+<tr><th>Detector</th><th class="l">Family</th><th class="l">Checkpoint</th><th style="white-space:nowrap">Params</th><th class="l">Network input</th></tr>
+<tr><td>Faster R-CNN R50-FPN v2</td><td class="l">two-stage, anchor-based</td><td class="l">torchvision <code>COCO_V1</code></td><td style="white-space:nowrap">43.7 M</td><td class="l">short side 800, long ≤ 1333</td></tr>
+<tr><td>YOLO11s</td><td class="l">one-stage, anchor-free</td><td class="l">Ultralytics <code>yolo11s.pt</code></td><td style="white-space:nowrap">9.5 M</td><td class="l">long side 640, letterbox</td></tr>
+<tr><td>Grounding DINO tiny</td><td class="l">open-vocabulary, query-based</td><td class="l">HF <code>IDEA-Research/grounding-dino-tiny</code></td><td style="white-space:nowrap">172.3 M</td><td class="l">short side 800, long ≤ 1333</td></tr>
+</table>
+<div class="cap"><b>Table 1.</b> Detectors. Parameter counts measured on the loaded models.</div>
+
+<h3>2.2 Datasets and the KITTI label policy</h3>
+<p>COCO val2017 provides 5,000 images and is scored on all 80 classes. For KITTI, the test labels are private, so a fixed random subset of 1,500 frames was drawn once (seed 42) from the 7,481 labeled training frames, and the frame list is stored in the repository. KITTI's classes were mapped onto COCO's own category IDs. The subset holds 6,822 scored boxes (5,687 car, 936 person, 199 truck) and 3,363 ignore regions (2,198 DontCare, 564 Van, 306 Cyclist, 196 Misc, 99 Tram).</p>
+<table>
+<tr><th>KITTI type</th><th class="l">Mapped to</th><th class="l">Reason</th></tr>
+<tr><td>Car / Truck</td><td class="l">car / truck</td><td class="l">same class in COCO</td></tr>
+<tr><td>Pedestrian, Person_sitting</td><td class="l">person</td><td class="l">COCO has one person class</td></tr>
+<tr><td>Van</td><td class="l">ignore (sensitivity test: car)</td><td class="l">COCO has no van class; models call vans car or truck</td></tr>
+<tr><td>Cyclist</td><td class="l">ignore (sensitivity test: person)</td><td class="l">COCO splits a cyclist into person + bicycle</td></tr>
+<tr><td>Tram, Misc, DontCare</td><td class="l">ignore</td><td class="l">no COCO equivalent, or unlabeled area</td></tr>
+</table>
+<div class="cap"><b>Table 2.</b> KITTI → COCO label policy. An <i>ignore</i> box is a COCO crowd region (<code>iscrowd=1</code>): a detection inside it is neither a true nor a false positive.</div>
+<p>The ignore policy keeps the comparison fair to COCO-trained models, which have no way to output "van" or "cyclist". Section 6.3 measures how much the score depends on this choice.</p>
+
+<h2>3. Experimental Setup and Hardware</h2>
+<p>All runs used one machine and one software stack, recorded automatically in <code>env.txt</code>: an Apple M5 with 10 CPU cores and 16 GB of unified memory, running macOS 26.5.2, Python 3.11.18, PyTorch 2.15.0, torchvision 0.29.2, Ultralytics 8.4.214, Transformers 5.23.0 and pycocotools 2.0.11. Every model ran on the graphics processing unit (GPU) through PyTorch's Metal Performance Shaders (MPS) backend, and no CPU fallback was needed.</p>
+<ul>
+<li><b>Accuracy:</b> one evaluator for every number, pycocotools <code>COCOeval</code> on bounding boxes [13]. It reports average precision (AP) averaged over intersection over union (IoU) thresholds 0.50–0.95, AP50/AP75 at a single threshold, AP<sub>S/M/L</sub> by object size, and average recall over 100 detections (AR100). Score threshold 0.001, at most 100 detections per image. On KITTI every model is asked for all 80 COCO classes, and other classes are dropped afterwards.</li>
+<li><b>Model settings:</b> Faster R-CNN keeps 100 boxes per image. YOLO11s uses non-maximum suppression (NMS) at IoU 0.7 with one class per box. Grounding DINO uses a box threshold of 0.05; its 80 class names are split into 4 prompts of 20 (47–56 tokens each), merged by class-wise NMS at IoU 0.5. Each box is classified by its mean probability over the tokens of each class name, as in the official Grounding DINO COCO evaluation.</li>
+<li><b>Speed:</b> batch size 1; 20 warm-up and 200 timed images (the same list for every model), repeated twice. Preprocessing, forward pass and postprocessing are timed separately, with a device synchronize before every timestamp. Image decoding is not timed. Peak MPS memory is sampled after each image. On the median, repeats agreed within 1.1% for every model.</li>
+</ul>
+
+<h2>4. Commands and Configurations</h2>
+<p>The repository reproduces every result from a clean clone. Each command is appended to <code>logs/commands.log</code>, and every run writes its full configuration (model, checkpoint, input size, thresholds, device, versions) to <code>results/&lt;run&gt;/config.json</code>.</p>
+<table class="small">
+<tr><th>Step</th><th class="l">Command</th><th class="l">Output</th></tr>
+<tr><td>Environment, COCO</td><td class="l"><code>scripts/m0_setup.sh</code></td><td class="l"><code>.venv</code>, <code>env.txt</code>, <code>data/coco/</code></td></tr>
+<tr><td>KITTI ground truth</td><td class="l"><code>scripts/m2_kitti.sh</code></td><td class="l"><code>kitti_subset_coco.json</code>, stats</td></tr>
+<tr><td>Pipeline check</td><td class="l"><code>scripts/m3_eval.sh</code></td><td class="l">200-image runs, YOLO cross-check</td></tr>
+<tr><td>Inference + evaluation</td><td class="l"><code>python -m src.eval.run_inference --model M --dataset D</code><br><code>python -m src.eval.coco_eval --run results/M_D</code></td><td class="l"><code>predictions.json</code>, <code>metrics.json</code></td></tr>
+<tr><td>All six full runs</td><td class="l"><code>scripts/m4_full_runs.sh</code></td><td class="l">results tables</td></tr>
+<tr><td>Speed benchmark</td><td class="l"><code>scripts/m5_benchmark.sh</code></td><td class="l"><code>benchmark.json</code></td></tr>
+<tr><td>Analyses</td><td class="l"><code>python -m src.analysis.{generalization,speed_accuracy,plots}</code></td><td class="l">tables, figures</td></tr>
+<tr><td>Open vocabulary, ablations</td><td class="l"><code>scripts/m8_open_vocab.sh</code> (uses <code>--rename</code>, <code>--set</code>)</td><td class="l">open-vocabulary tables</td></tr>
+<tr><td>Failure analysis</td><td class="l"><code>python -m src.analysis.failures</code></td><td class="l">gallery, failure counts</td></tr>
+</table>
+<div class="cap"><b>Table 3.</b> Commands in order. Settings live in <code>configs/models.yaml</code> and <code>configs/kitti_mapping*.yaml</code>; <code>--set KEY=VALUE</code> overrides a model setting for one run.</div>
+
+<h2>5. Quantitative Results</h2>
+<p>All three detectors reproduce their published COCO accuracy, which confirms the pipeline before any comparison. Faster R-CNN reaches 46.9 AP against 46.7 in torchvision's model card [11], YOLO11s 45.5 against 47.0 [7], and Grounding DINO 46.7 against 48.4 for the same Swin-T checkpoint [8]. As a further check, YOLO11s was also scored by Ultralytics' own validator. Our pipeline is 0.7 AP below that validator's number. About 0.6 AP of the gap to pycocotools scoring the validator's predictions comes from its multi-label NMS, which can keep one box under several classes; our pipeline keeps the deployment default of one class per box. No result differs from its reference by more than 1.7 AP.</p>
+<table>
+<tr><th>Detector</th><th>Dataset</th><th>AP</th><th>AP50</th><th>AP75</th><th>AP<sub>S</sub></th><th>AP<sub>M</sub></th><th>AP<sub>L</sub></th><th>AR100</th><th>Latency (ms)</th><th>FPS</th></tr>
+<tr><td>Faster R-CNN</td><td>COCO</td><td><b>46.9</b></td><td>67.9</td><td>51.4</td><td>30.9</td><td>50.8</td><td>60.3</td><td>63.0</td><td>255.9</td><td>3.9</td></tr>
+<tr><td>YOLO11s</td><td>COCO</td><td>45.5</td><td>62.0</td><td>49.2</td><td>27.6</td><td>50.1</td><td>62.5</td><td>60.2</td><td><b>13.2</b></td><td><b>75.9</b></td></tr>
+<tr><td>Grounding DINO</td><td>COCO</td><td>46.7</td><td>63.2</td><td>50.4</td><td>32.5</td><td>49.9</td><td>61.3</td><td>66.3</td><td>2786.6</td><td>0.4</td></tr>
+<tr class="sep"><td>Faster R-CNN</td><td>KITTI</td><td><b>37.8</b></td><td>68.7</td><td>37.8</td><td>25.2</td><td>35.9</td><td>47.8</td><td>55.1</td><td>201.0</td><td>5.0</td></tr>
+<tr><td>YOLO11s</td><td>KITTI</td><td>31.4</td><td>59.0</td><td>29.8</td><td>21.3</td><td>29.1</td><td>43.5</td><td>45.8</td><td><b>8.3</b></td><td><b>120.8</b></td></tr>
+<tr><td>Grounding DINO</td><td>KITTI</td><td>36.5</td><td>66.8</td><td>36.1</td><td>29.8</td><td>34.0</td><td>46.6</td><td>54.3</td><td>1781.7</td><td>0.6</td></tr>
+</table>
+<div class="cap"><b>Table 4.</b> Main results (%). COCO: 80 classes, 5,000 images. KITTI: car/person/truck, 1,500 frames. Latency: median per image, batch 1, M5 MPS (Section 3).</div>
+<p>On COCO, accuracy barely separates the three designs, but on KITTI it does. Faster R-CNN leads on KITTI by 1.3 AP over Grounding DINO and by 6.4 AP over YOLO11s.</p>
+
+<h2>6. Analysis 1: Cross-Dataset Generalization</h2>
+<p>To compare like with like, COCO was re-evaluated on car, person and truck only. On these three classes AP falls from COCO to KITTI by 12.9 points for Faster R-CNN (50.8 → 37.8, −26%), 14.9 for YOLO11s (46.3 → 31.4, −32%) and 13.5 for Grounding DINO (49.9 → 36.5, −27%). The loss is far from uniform, and its pattern points to specific causes.</p>
+
+<div class="keep"><h3>6.1 Cars transfer; pedestrians do not</h3>
+<figure><img src="../figures/per_class_ap.png" alt="Per-class AP, COCO vs KITTI"><div class="cap"><b>Fig. 1.</b> Per-class AP, COCO (gray) vs. KITTI (model color).</div></figure>
+</div>
+<p>Car AP is essentially unchanged across datasets (−2.1 to +2.5 points), whereas person AP halves for every model (59.6 → 29.9, 58.6 → 27.0 and 62.3 → 29.7). Truck AP falls by 6–15 points, but KITTI contains only 199 truck boxes. The pedestrian loss is mostly a localization effect, as Fig. 2 shows. For Faster R-CNN, person AP50 falls from 86.5 to 65.3 but person AP75 falls from 65.3 to 22.0. The other two models show the same pattern: AP75 loses about two thirds and AP50 about a quarter. Car AP50 even rises on KITTI (76.0 → 85.6 for Faster R-CNN) while car AP75 stays level. Recall at IoU 0.5 confirms that the pedestrians are found, at 74–80% when every detection is kept, and their median height is 97 px, so most are not small. The evidence therefore points to boxes that do not match KITTI's pedestrian boxes at strict IoU, rather than to pedestrians the models fail to see.</p>
+<div class="row">
+<figure><img src="../figures/ap_vs_iou.png" alt="AP vs IoU threshold"><div class="cap"><b>Fig. 2.</b> AP at each IoU threshold (dashed = COCO, solid = KITTI). The person gap widens with IoU.</div></figure>
+</div>
+
+<h3>6.2 Object size and occlusion</h3>
+<p>AP drops at every object size, and medium and large objects lose the most (Faster R-CNN AP<sub>M</sub> 57.9 → 35.9, AP<sub>L</sub> 67.4 → 47.8). Grounding DINO is the most robust on small objects (AP<sub>S</sub> 33.5 → 29.8, against 36.3 → 25.2 for Faster R-CNN). Occlusion matters more than size. A small custom matcher assigned detections greedily in score order at IoU ≥ 0.5 and counted the KITTI boxes found at score ≥ 0.3 (Fig. 3). Car recall falls from 93.7–98.1% when fully visible to 45.2–61.3% when largely occluded, and person recall falls from 76.3–91.4% to 9.7–16.7%. Median car height barely changes across the occlusion levels (49/43/45 px), so this is not a size effect in disguise. YOLO11s is the most sensitive at this threshold, but keeping all its detections raises its partly-occluded pedestrian recall from 42.5% to 70.3%. Its occluded detections therefore exist but receive low scores.</p>
+<div class="row">
+<figure><img src="../figures/recall_vs_occlusion.png" alt="Recall vs occlusion"><div class="cap"><b>Fig. 3.</b> KITTI recall at IoU ≥ 0.5 by occlusion level (solid: score ≥ 0.3; dashed: all detections). <i>n</i> = boxes per level.</div></figure>
+</div>
+
+<h3>6.3 Label-policy sensitivity</h3>
+<p>Scoring the same saved predictions against alternative ground truth shows that the KITTI number depends on the policy. Treating Van as car lowers car AP by only 1.7–2.8 points but truck AP by 9.4–11.2, because the models label many vans "truck" (363 such boxes for Faster R-CNN at score ≥ 0.3). Under the default policy those boxes are neutral; under Van: car they become truck false positives. Treating Cyclist as person lowers person AP by 5.8–7.8 points. A KITTI score for COCO models is therefore partly a statement about the label mapping, which must be reported along with it.</p>
+
+<h2>7. Analysis 2: Speed–Accuracy Tradeoff</h2>
+<figure><img src="../figures/speed_accuracy.png" alt="Speed vs accuracy" style="width:58%; margin:0 auto;"><div class="cap"><b>Fig. 4.</b> AP vs. median latency (log scale); circles COCO, squares KITTI; labels give peak MPS memory.</div></figure>
+<figure><img src="../figures/latency_breakdown.png" alt="Latency breakdown" style="width:86%; margin:0 auto;"><div class="cap"><b>Fig. 5.</b> Mean latency per stage: preprocess, forward, postprocess (each panel has its own scale).</div></figure>
+<p>The accuracy differences are small next to the cost differences. On COCO, Faster R-CNN buys 1.4 AP over YOLO11s at 19× the latency (256 vs. 13 ms) and 12× the peak memory (2.2 GB vs. 183 MB). Grounding DINO is another 11× slower than Faster R-CNN and peaks at 5.4 GB, with 0.2 AP less. On the fixed COCO classes, Faster R-CNN therefore dominates Grounding DINO on both datasets, while YOLO11s and Faster R-CNN each stay best for their own latency. The forward pass accounts for 97–99% of the time for the two large models. Pre- and postprocessing are 22% (COCO) and 37% (KITTI) of YOLO11s's time. The measured postprocessing time is an upper bound, because the mAP setting (score threshold 0.001) leaves many boxes for NMS.</p>
+<p>Two design choices explain most of the latency. Input size is the first. Faster R-CNN and Grounding DINO upscale a typical COCO image from 0.28 to about 0.9 megapixels, while YOLO11s works near native resolution (0.30 Mpx), and its forward time tracks input pixels closely (34–36 ms per megapixel). Every model is faster on KITTI because each sees fewer input pixels there. YOLO11s, however, downscales KITTI's wide frames to 640×224, about a third of the original pixels, which coincides with its largest KITTI accuracy drop. The second is prompt chunking. Grounding DINO's BERT text encoder takes only about 33 ms per image (1.2–1.9% of the forward time), but splitting the 80 COCO names into 4 prompts runs the image backbone and decoder 4 times.</p>
+<table>
+<tr><th>Ablation</th><th class="l">Setting</th><th>AP</th><th>AP<sub>M</sub></th><th>truck AP</th><th>Latency (ms)</th><th>Peak mem. (MB)</th></tr>
+<tr><td>YOLO11s on KITTI</td><td class="l">input 640 (main results)</td><td>31.4</td><td>29.1</td><td>20.0</td><td>8.3</td><td>118</td></tr>
+<tr><td></td><td class="l">input 1280</td><td><b>35.9</b></td><td>35.4</td><td>28.1</td><td>16.5</td><td>1,102</td></tr>
+<tr class="sep"><td>Grounding DINO, COCO (first 200 images)</td><td class="l">4 prompts × 20 classes (main results)</td><td>51.8</td><td>–</td><td>–</td><td>2,787</td><td>5,409</td></tr>
+<tr><td></td><td class="l">1 prompt × 80 classes (195 tokens)</td><td><b>53.1</b></td><td>–</td><td>–</td><td><b>740</b></td><td>5,384</td></tr>
+</table>
+<div class="cap"><b>Table 5.</b> Ablations testing both explanations. The main results keep the planned settings.</div>
+<p>Both explanations hold up. Doubling YOLO11s's input adds 4.5 AP on KITTI (most of it on medium objects and trucks) and still runs 12× faster than Faster R-CNN. A single Grounding DINO prompt is 3.8× faster and slightly more accurate, so the main results understate that model's speed.</p>
+
+<h2>8. Analysis 3: Closed-Set vs. Open-Vocabulary Detection</h2>
+<p>Grounding DINO was run again on the KITTI frames with the KITTI-native prompt <code>car . van . truck . pedestrian . cyclist .</code>. The predictions were scored in two ways: mapped back to the default car/person/truck ground truth, and against a native ground truth in which Van and Cyclist are real classes.</p>
+<div class="row">
+<table>
+<tr><th>Mapped to car/person/truck</th><th>AP</th><th>car</th><th>person</th><th>truck</th></tr>
+<tr><td>COCO-80 prompt (Table 4)</td><td>36.5</td><td>48.4</td><td>29.7</td><td>31.3</td></tr>
+<tr><td>KITTI prompt</td><td>39.0</td><td>50.8</td><td>22.1</td><td>44.3</td></tr>
+<tr><td>KITTI prompt, "person"</td><td><b>40.7</b></td><td>49.3</td><td>28.0</td><td>44.8</td></tr>
+<tr><td>Faster R-CNN (closed-set)</td><td>37.8</td><td>50.2</td><td>29.9</td><td>33.3</td></tr>
+</table>
+<table>
+<tr><th>Native classes</th><th>car</th><th>van</th><th>truck</th><th>ped.</th><th>cyclist</th></tr>
+<tr><td>AP</td><td>48.4</td><td>24.7</td><td>36.2</td><td>18.1</td><td>10.9</td></tr>
+<tr><td>AP50</td><td>81.0</td><td>36.9</td><td>54.5</td><td>37.0</td><td>27.9</td></tr>
+<tr><td>GT boxes</td><td>5,687</td><td>564</td><td>199</td><td>936</td><td>306</td></tr>
+<tr class="sep"><td>ped. as "person"</td><td colspan="5" class="l">pedestrian AP 24.0</td></tr>
+<tr><td>ped. as "walking person"</td><td colspan="5" class="l">pedestrian AP 12.0</td></tr>
+</table>
+</div>
+<div class="cap"><b>Table 6.</b> Left: KITTI prompt mapped back (car + van → car; cyclist dropped). Right: native evaluation and the effect of wording the pedestrian class.</div>
+<p>Changing only the prompt moves Grounding DINO from 36.5 to 39.0 AP, above Faster R-CNN's 37.8, and the gain comes mostly from trucks (+13.0). With five classes instead of eighty, a truck no longer competes with bus, car or train for its score, which is a plausible explanation that this study did not isolate. The short prompt also runs in 385 ms per image instead of 1,730 ms. In the native evaluation the model detects vans (24.7 AP) and cyclists (10.9 AP) zero-shot. Faster R-CNN and YOLO11s cannot represent either class. Wording, however, is a fragile control. Pedestrian AP is 18.1 with "pedestrian", 24.0 with "person" and 12.0 with "walking person", a factor of two from one phrase. Because these wordings were compared on the evaluation frames themselves, the 40.7 AP figure is an optimistic upper bound rather than a held-out result.</p>
+
+<h2>9. Failure Analysis</h2>
+<p>Every KITTI detection at score ≥ 0.3 was classified with the same matcher as true positive, duplicate, inside an ignore region, or false positive. False positives were further split into wrong class, poor localization and background. Missed ground-truth boxes were recorded with their occlusion and size.</p>
+<table class="small">
+<tr><th>At score ≥ 0.3 (6,822 KITTI boxes)</th><th>Faster R-CNN</th><th>YOLO11s</th><th>Grounding DINO</th></tr>
+<tr><td>Missed boxes (of which occluded / small)</td><td>961 (768 / 135)</td><td>1,715 (1,266 / 484)</td><td>1,127 (872 / 162)</td></tr>
+<tr><td>False positives (score &gt; 0.5)</td><td>5,538 (3,487)</td><td>1,008 (366)</td><td>3,264 (564)</td></tr>
+<tr><td>FP split: background / localization / wrong class</td><td>63% / 34% / 3%</td><td>33% / 62% / 4%</td><td>62% / 35% / 3%</td></tr>
+<tr><td>Duplicate boxes on matched objects</td><td>95</td><td>149</td><td>18</td></tr>
+<tr><td>Van regions labeled "truck"</td><td>363</td><td>158</td><td>360</td></tr>
+<tr><td>Cyclists given both a person and a bicycle box (of 306)</td><td>146</td><td>67</td><td>208</td></tr>
+</table>
+<div class="cap"><b>Table 7.</b> Failure counts. Cyclist row: re-run with all 80 COCO classes kept.</div>
+<p>Four failure modes stand out. First, occlusion: 74–80% of all missed boxes are partly or largely occluded, for every model. Second, confidence: Faster R-CNN produces 3,487 false positives above 0.5, almost ten times YOLO11s's 366, for a 6.4-point AP advantage. Its scores are therefore poorly suited to a fixed operating threshold without recalibration. Third, label definitions. Fig. 7 shows a box truck that KITTI labels Van and Faster R-CNN calls "truck" with score 1.00, and the white van on the right of Fig. 6 is labeled Car. Fig. 8 shows a KITTI Cyclist, which COCO-trained models describe as a person plus a bicycle, so neither box matches the single cyclist box. Fourth, box extent (Fig. 6). For heavily occluded parked cars, KITTI's boxes extend behind the cars in front, while every detector boxes only the visible part, which yields IoU below 0.5, a false positive and a missed box at once. This last observation comes from inspected frames and was not measured systematically, but it is consistent with the high-IoU losses of Section 6.1.</p>
+<figure><img src="../figures/failures/11_side_by_side_000112.png" alt="Side by side, frame 000112" style="width:62%; margin:0 auto;"><div class="cap"><b>Fig. 6.</b> Frame 000112, all three models (green: ground truth; blue: correct; red: false positive; gray dashed: ignore region). The occluded parked cars carry wide ground-truth boxes that visible-part detections cannot match.</div></figure>
+<figure><img src="../figures/failures/09_mapping_detection_on_a_Van_faster_rcnn_001045.png" alt="Van labelled truck"><div class="cap"><b>Fig. 7.</b> Frame 001045, Faster R-CNN: a box truck labeled "Van" by KITTI (light-blue dashed: detection inside an ignore region) is detected as "truck 1.00". Right: zoom.</div></figure>
+<figure><img src="../figures/failures/10_mapping_cyclist_faster_rcnn_006894.png" alt="Cyclist"><div class="cap"><b>Fig. 8.</b> Frame 006894, Faster R-CNN with all 80 COCO classes: one KITTI Cyclist box receives "person 0.95" and "bicycle 0.87" (orange dashed). Right: zoom.</div></figure>
+
+<h2>10. Conclusions</h2>
+<p>The three pretrained detectors are nearly equal on the dataset they were trained for and clearly unequal on a driving benchmark. On COCO they sit within 1.4 AP, while latency spans two orders of magnitude, from 13 ms for YOLO11s to 2.8 s for Grounding DINO with four prompt chunks. On KITTI, all three lose 26–32% of their AP on the shared classes. The loss is concentrated in pedestrians, strict IoU thresholds and occluded objects, while cars transfer without loss. Several observations indicate that part of this gap reflects how the two datasets define boxes and classes, not only what the models fail to see: high recall at IoU 0.5, wide ground-truth boxes on occluded cars, vans labeled as trucks and cars, and cyclists split into two COCO classes. Reported KITTI scores for COCO models should therefore always state their label mapping and IoU threshold.</p>
+<p>For practice, the results suggest a clear choice. On this hardware, YOLO11s with a 1280 px input is the best real-time option measured: 35.9 AP on KITTI at 16.5 ms, within 1.9 AP of Faster R-CNN at about a twelfth of its latency. Faster R-CNN gives the best fixed-class accuracy among the planned settings, but its many confident false positives would need score recalibration. Grounding DINO with a task-specific prompt was the most accurate (39.0–40.7 AP) and the only model able to detect vans and cyclists. It still needs 385 ms per image, and its accuracy depends strongly on the wording of each class name.</p>
+<p><b>Limitations.</b> No model was fine-tuned. The KITTI subset is 1,500 frames, with only 199 trucks. MPS timings, including a one-off kernel compilation for each new input shape (141 vs. 13.5 ms per image for YOLO11s), are not equivalent to timings on an NVIDIA GPU. The prompt wordings were compared on the evaluation data. The box-extent explanation rests on inspected frames rather than a systematic measurement. Future work should fine-tune on held-out KITTI frames, measure the box-extent effect directly by comparing predicted and ground-truth box edges, and repeat the timings on a CUDA GPU.</p>
+
+<h2>References</h2>
+<div class="refs">
+<p>[1] T.-Y. Lin, M. Maire, S. Belongie, J. Hays, P. Perona, D. Ramanan, P. Dollár, and C. L. Zitnick, "Microsoft COCO: Common objects in context," in <i>Proc. Eur. Conf. Comput. Vis. (ECCV)</i>, 2014, pp. 740–755.</p>
+<p>[2] A. Geiger, P. Lenz, and R. Urtasun, "Are we ready for autonomous driving? The KITTI vision benchmark suite," in <i>Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)</i>, 2012, pp. 3354–3361.</p>
+<p>[3] S. Ren, K. He, R. Girshick, and J. Sun, "Faster R-CNN: Towards real-time object detection with region proposal networks," in <i>Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)</i>, 2015, pp. 91–99.</p>
+<p>[4] T.-Y. Lin, P. Dollár, R. Girshick, K. He, B. Hariharan, and S. Belongie, "Feature pyramid networks for object detection," in <i>Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)</i>, 2017, pp. 2117–2125.</p>
+<p>[5] Y. Li, S. Xie, X. Chen, P. Dollár, K. He, and R. Girshick, "Benchmarking detection transfer learning with vision transformers," arXiv:2111.11429, 2021.</p>
+<p>[6] J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, "You only look once: Unified, real-time object detection," in <i>Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)</i>, 2016, pp. 779–788.</p>
+<p>[7] G. Jocher and J. Qiu, "Ultralytics YOLO11," 2024. [Online]. Available: https://github.com/ultralytics/ultralytics</p>
+<p>[8] S. Liu, Z. Zeng, T. Ren, F. Li, H. Zhang, J. Yang, C. Li, J. Yang, H. Su, J. Zhu, and L. Zhang, "Grounding DINO: Marrying DINO with grounded pre-training for open-set object detection," in <i>Proc. Eur. Conf. Comput. Vis. (ECCV)</i>, 2024. Model zoo: https://github.com/IDEA-Research/GroundingDINO</p>
+<p>[9] N. Carion, F. Massa, G. Synnaeve, N. Usunier, A. Kirillov, and S. Zagoruyko, "End-to-end object detection with transformers," in <i>Proc. Eur. Conf. Comput. Vis. (ECCV)</i>, 2020, pp. 213–229.</p>
+<p>[10] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, "BERT: Pre-training of deep bidirectional transformers for language understanding," in <i>Proc. NAACL-HLT</i>, 2019, pp. 4171–4186.</p>
+<p>[11] TorchVision maintainers and contributors, "TorchVision: PyTorch's computer vision library," 2016. [Online]. Available: https://github.com/pytorch/vision</p>
+<p>[12] T. Wolf <i>et al.</i>, "Transformers: State-of-the-art natural language processing," in <i>Proc. Conf. Empirical Methods Natural Lang. Process.: Syst. Demonstrations (EMNLP)</i>, 2020, pp. 38–45.</p>
+<p>[13] COCO Consortium, "COCO API (pycocotools)." [Online]. Available: https://github.com/cocodataset/cocoapi</p>
+<p>[14] Z. Liu, Y. Lin, Y. Cao, H. Hu, Y. Wei, Z. Zhang, S. Lin, and B. Guo, "Swin Transformer: Hierarchical vision transformer using shifted windows," in <i>Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV)</i>, 2021, pp. 10012–10022.</p>
+</div>
+
+</body>
+</html>

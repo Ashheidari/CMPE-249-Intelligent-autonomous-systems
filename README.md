@@ -178,3 +178,11 @@ interpretation are marked `TODO(user)`.
 
 `logs/commands.log` lists every command run through `scripts/log_cmd.sh`. It ends with a clearly marked,
 reconstructed list of the test and re-render commands that were run without it.
+
+### 11. Submission PDF
+```bash
+AUTHOR="Your Name" scripts/build_report_pdf.sh   # -> report/submission/technical_report.pdf (9 pages)
+```
+The submitted technical report is `report/submission/technical_report.html`, rendered to PDF with headless
+Google Chrome (set `CHROME=/path/to/chrome` if it is installed elsewhere). It uses the figures in
+`report/figures/`. Every number in it comes from the generated tables and JSON files described above.
